@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HrMangementApi", "HrMangementApi\HrMangementApi.csproj", "{CAC14283-4D02-4D8D-A86D-90EF0AD30713}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CAC14283-4D02-4D8D-A86D-90EF0AD30713}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAC14283-4D02-4D8D-A86D-90EF0AD30713}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAC14283-4D02-4D8D-A86D-90EF0AD30713}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAC14283-4D02-4D8D-A86D-90EF0AD30713}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A61D54B6-9E23-4C93-A5A7-18D32CDBFCDE}
+	EndGlobalSection
+EndGlobal
