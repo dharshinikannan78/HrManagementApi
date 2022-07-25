@@ -22,12 +22,12 @@ namespace HrMangementApi.Controllers
         [HttpPost("Login")]
         public IActionResult GetLogin([FromBody] Login loginData)
         {
-            var user = dataContext.LoginModels.Where(q => q.UserName == loginData.UserName && q.Password == loginData.Password);
+            var user = dataContext.LoginModels.Where(q => q.MailId == loginData.MailId && q.Password == loginData.Password);
             return Ok(user);
         }
 
         [HttpPost("AddUser")]
-        public IActionResult AddUserlogin([FromBody] Login loginData)
+        public IActionResult AddUserLogin([FromBody] Login loginData)
         {
 
             dataContext.LoginModels.Add(loginData);
