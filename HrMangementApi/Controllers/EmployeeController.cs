@@ -37,7 +37,7 @@ namespace HrMangementApi.Controllers
 
         }
 
-        [HttpDelete("Delete")]
+        [HttpDelete("DeleteEmployee")]
         public IActionResult DeletEmployee(int id)
         {
             var delete = dataContext.LoginModels.Find(id);
