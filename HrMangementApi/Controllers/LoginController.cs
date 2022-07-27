@@ -20,10 +20,31 @@ namespace HrMangementApi.Controllers
         }
 
         [HttpPost("Login")]
-        public IActionResult GetLogin([FromBody] Login loginData)
+        public IActionResult GetLogin([FromBody] Login userObj)
         {
-            var user = dataContext.LoginModels.Where(q => q.MailId == loginData.MailId && q.Password == loginData.Password);
-            return Ok(user);
+            if (userObj == null)
+            {
+                return BadRequest();
+            }
+            else
+            {
+                var user = dataContext.LoginModels.Where(q =>
+                q.MailId == userObj.MailId
+                && q.Password == userObj.Password).FirstOrDefault();
+
+                if (user != null)
+                {
+                    return Ok(user);
+                }
+                else
+                {
+                    return NotFound(new
+                    {
+                        StatusCode = 404,
+                        Message = "Unauthorized"
+                    });
+                }
+            }
         }
 
         [HttpPost("AddUser")]

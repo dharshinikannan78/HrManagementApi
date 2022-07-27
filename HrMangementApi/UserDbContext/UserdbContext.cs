@@ -13,7 +13,7 @@ namespace HrMangementApi.UserDbContext
         protected override void OnModelCreating(ModelBuilder modelBulider)
 
         {
-            modelBulider.Entity<Login>().ToTable("login");
+            modelBulider.Entity<Login>().ToTable("usermanagement");
         }
     }
 }
