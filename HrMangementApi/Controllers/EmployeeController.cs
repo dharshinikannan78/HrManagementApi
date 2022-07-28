@@ -13,7 +13,6 @@ namespace HrMangementApi.Controllers
     [EnableCors("AllowOrigin")]
     public class EmployeeController : ControllerBase
     {
-
         private readonly UserdbContext dataContext;
         public EmployeeController(UserdbContext _dataContext)
         {
@@ -27,14 +26,12 @@ namespace HrMangementApi.Controllers
             return Ok(details);
         }
 
-
         [HttpPost("AddEmployee")]
         public IActionResult AddEmployee([FromBody] EmployeeDetails EmployeeData)
         {
             dataContext.EmployeeModel.Add(EmployeeData);
             dataContext.SaveChanges();
             return Ok(EmployeeData);
-
         }
 
         [HttpDelete("DeleteEmployee")]
@@ -52,8 +49,9 @@ namespace HrMangementApi.Controllers
                 return Ok();
             }
         }
+
         [HttpPut("Update")]
-        public IActionResult UpdateEmployee([FromBody] EmployeeDetails EmployeeData )
+        public IActionResult UpdateEmployee([FromBody] EmployeeDetails EmployeeData)
         {
             var res = dataContext.EmployeeModel.AsNoTracking().FirstOrDefault(a => a.EmployeeId == EmployeeData.EmployeeId);
             if (res == null)
