@@ -64,8 +64,16 @@ namespace HrMangementApi.Controllers
             {
                 dataContext.Entry(EmployeeData).State = EntityState.Modified;
                 dataContext.SaveChanges();
-                return Ok();
+                return Ok(EmployeeData);
             }
+        }
+
+        [HttpGet]
+        public IActionResult GetEmployeeDetailsById(int id)
+        {
+            var res = dataContext.EmployeeModel.AsNoTracking().FirstOrDefault(a => a.EmployeeId == id);
+            return Ok(res);
+
         }
     }
 }
