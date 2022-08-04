@@ -56,6 +56,7 @@ namespace HrMangementApi.Controllers
             return Ok(loginData);
         }
 
+
         [HttpDelete("Delete")]
         public IActionResult DeletUser(int id)
         {

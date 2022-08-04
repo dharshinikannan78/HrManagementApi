@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 
 namespace HrMangementApi.Controllers
@@ -27,11 +28,11 @@ namespace HrMangementApi.Controllers
         }
 
         [HttpPost("AddEmployee")]
-        public IActionResult AddEmployee([FromBody] EmployeeDetails EmployeeData)
+        public IActionResult AddEmployee([FromBody] EmployeeDetails employeeData)
         {
-            dataContext.EmployeeModel.Add(EmployeeData);
+            dataContext.EmployeeModel.Add(employeeData);
             dataContext.SaveChanges();
-            return Ok(EmployeeData);
+            return Ok(employeeData);
         }
 
         [HttpDelete("DeleteEmployee")]
@@ -71,6 +72,32 @@ namespace HrMangementApi.Controllers
         {
             var res = dataContext.EmployeeModel.AsNoTracking().FirstOrDefault(a => a.EmployeeId == id);
             return Ok(res);
+
+        }
+
+
+        [HttpGet("GetEmployeeDetails")]
+        public IActionResult GetEmployees()
+        {
+
+            var allemployess = (from a in dataContext.EmployeeModel
+                                join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
+
+                                select new
+                                {
+                                    a.FirstName,
+                                    a.LastName,
+                                    a.JoiningDate,
+                                    a.Designation,
+                                    p.AttachmentName,
+                                    p.AttachmentType,
+                                    p.AttachmentId,
+                                    a.AttachmentIds,
+                                    a.Number,
+                                    a.EmailId,
+                                }).ToList();
+            var employees = allemployess.ToList();
+            return Ok(employees);
 
         }
     }
