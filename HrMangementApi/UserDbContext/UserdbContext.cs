@@ -7,9 +7,10 @@ namespace HrMangementApi.UserDbContext
     {
         public UserdbContext(DbContextOptions<UserdbContext> Options) : base(Options) { }
         public DbSet<Login> LoginModels { get; set; }
-        public DbSet<AttendanceDetails> AttendanceModel { get; set;  }
+        public DbSet<AttendanceDetails> AttendanceModel { get; set; }
         public DbSet<EmployeeDetails> EmployeeModel { get; set; }
         public DbSet<LeaveDetails> LeaveModel { get; set; }
+        public DbSet<FileAttachmentModel> FileAttachment { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBulider)
 
@@ -18,6 +19,7 @@ namespace HrMangementApi.UserDbContext
             modelBulider.Entity<AttendanceDetails>().ToTable("attendance_details");
             modelBulider.Entity<EmployeeDetails>().ToTable("employee_details");
             modelBulider.Entity<LeaveDetails>().ToTable("leave_details");
+            modelBulider.Entity<FileAttachmentModel>().ToTable("attachment_file");
         }
     }
 }
