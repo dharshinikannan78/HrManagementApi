@@ -14,8 +14,8 @@ namespace HrMangementApi.Model
         public string Address { get; set; }
         public string Number { get; set; }
         public string EmailId { get; set; }
-        public string DOB { get; set; }
-        public string JoiningDate { get; set; }
+        public DateTime DOB { get; set; }
+        public DateTime JoiningDate { get; set; }
         public string EmployeeReferenceNo { get; set; }
         public string WorkMode { get; set; }
         public string AttachmentIds { get; set; }

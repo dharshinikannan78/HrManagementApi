@@ -1,4 +1,4 @@
-﻿using HrMangementApi.Model;
+﻿    using HrMangementApi.Model;
 using HrMangementApi.UserDbContext;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
