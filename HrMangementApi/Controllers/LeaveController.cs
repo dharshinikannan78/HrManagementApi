@@ -22,9 +22,10 @@ namespace HrMangementApi.Controllers
         [HttpPost("ApplyLeave")]
         public IActionResult ApplyLeave([FromBody] LeaveDetails leaveData)
         {
+            leaveData.ApprovalStatus = "Pending";
             var diff = leaveData.EndDate - leaveData.StartDate;
-            var noofDays= (int)diff.Days;
-            leaveData.NoofDaysLeave = noofDays;
+            var noofDays = diff.Days;
+            leaveData.NoOfDays = noofDays;
             leaveData.AppliedOn = DateTime.UtcNow.Date;
             dataContext.LeaveModel.Add(leaveData);
             dataContext.SaveChanges();
