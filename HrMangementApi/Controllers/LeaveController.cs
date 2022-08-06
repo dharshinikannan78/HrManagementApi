@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 
 namespace HrMangementApi.Controllers
@@ -19,11 +20,15 @@ namespace HrMangementApi.Controllers
             dataContext = _dataContext;
         }
         [HttpPost("ApplyLeave")]
-        public IActionResult ApplyLeave([FromBody] LeaveDetails LeaveData)
+        public IActionResult ApplyLeave([FromBody] LeaveDetails leaveData)
         {
-            dataContext.LeaveModel.Add(LeaveData);
+            var diff = leaveData.EndDate - leaveData.StartDate;
+            var noofDays= (int)diff.Days;
+            leaveData.NoofDaysLeave = noofDays;
+            leaveData.AppliedOn = DateTime.UtcNow.Date;
+            dataContext.LeaveModel.Add(leaveData);
             dataContext.SaveChanges();
-            return Ok(LeaveData);
+            return Ok(leaveData);
         }
         [HttpGet("GetAllLeaveDetails")]
         public IActionResult AllLeaveDetails()

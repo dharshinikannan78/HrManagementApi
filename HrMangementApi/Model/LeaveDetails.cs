@@ -15,6 +15,7 @@ namespace HrMangementApi.Model
         public DateTime AppliedOn { get; set; }
         public string ApprovalStatus { get; set; }
         public string Reason { get; set; }
+        public int NoofDaysLeave { get; set; }
 
     }
 }
