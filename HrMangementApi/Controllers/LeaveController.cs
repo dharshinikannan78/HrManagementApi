@@ -26,6 +26,7 @@ namespace HrMangementApi.Controllers
             var noofDays= (int)diff.Days;
             leaveData.NoofDaysLeave = noofDays;
             leaveData.AppliedOn = DateTime.UtcNow.Date;
+            leaveD
             dataContext.LeaveModel.Add(leaveData);
             dataContext.SaveChanges();
             return Ok(leaveData);
