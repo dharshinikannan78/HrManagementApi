@@ -129,6 +129,7 @@ namespace HrMangementApi.Controllers
 
             return contentType;
         }
+        
     }
 
 }

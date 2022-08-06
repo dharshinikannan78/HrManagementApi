@@ -100,5 +100,35 @@ namespace HrMangementApi.Controllers
             return Ok(employees);
 
         }
+        [HttpGet("EmployeeDetails")]
+        public IActionResult GetAttendance(int id)
+        {
+
+            var allemployess = (from a in dataContext.LeaveModel
+                                join p in dataContext.EmployeeModel on a.EmployeeId equals p.EmployeeId
+                                join l in dataContext.AttendanceModel on a.EmployeeId equals l.EmployeeId into groupcls
+                                from gc in groupcls.DefaultIfEmpty()
+                                where a.EmployeeId == id
+
+                                group gc by new
+                                {
+                                    id = p.EmployeeId == null ? 0 : p.EmployeeId,
+                                    name = a.StartDate,
+                                    h = gc.Status,
+                                    s = a.StatusOn
+
+                                } into g
+                                select new
+                                {
+                                    name = g.Key.id,
+                                    h1 = g.Key.name,
+                                    h2 = g.Key.h,
+                                    bh3 = g.Key.s
+                                }).ToList();
+            return Ok(allemployess);
+            /* var employees = allemployess.ToList();
+             return Ok(employees);*/
+
+        }
     }
 }

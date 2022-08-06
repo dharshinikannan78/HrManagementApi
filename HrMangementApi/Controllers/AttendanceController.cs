@@ -40,6 +40,9 @@ namespace HrMangementApi.Controllers
             dataContext.AttendanceModel.Add(data);
             dataContext.SaveChanges();
             return Ok(data);
-        }
+        }    
+      
+
     }
+
 }
