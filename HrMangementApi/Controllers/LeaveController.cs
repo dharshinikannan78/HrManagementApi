@@ -64,6 +64,25 @@ namespace HrMangementApi.Controllers
                 return Ok();
             }
         }
+        [HttpGet("GetLeave")]
+        public IActionResult GetLeave(int data)
+        {
+            var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
+            var leave = dataContext.LeaveModel.Where(x => x.EmployeeId == data).AsQueryable();
+            if (user != null && user.Role == "Admin")
+            {
+                var AllUser = dataContext.LeaveModel.AsQueryable();
+                return Ok(AllUser);
+
+            }
+            if (user != null && user.Role == "Employee")
+            {
+                return Ok(leave);
+
+            }
+
+            return BadRequest();
+        }
 
     }
 }

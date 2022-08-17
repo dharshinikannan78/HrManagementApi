@@ -1,9 +1,11 @@
 ﻿using HrMangementApi.Model;
 using HrMangementApi.UserDbContext;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
-
+using System.Linq;
 namespace HrMangementApi.Controllers
 {
     [Route("api/[controller]")]
@@ -25,24 +27,38 @@ namespace HrMangementApi.Controllers
         [HttpPost("AddAttendance")]
         public IActionResult AddAttendance([FromBody] AttendanceDetails data)
         {
-            /* const int WorkingHours = 8;
-             var diff = Data.OutTime - Data.InTime;
-             var TotalDuration = (int)diff.TotalHours;
-             Data.WorkDuration = TotalDuration;
-             if(TotalDuration >= 8)
-             {
-                 Data.OverTimeDuration = TotalDuration - WorkingHours;
-             }
-             Data.Status = "Present";*/
-            data.Date = DateTime.UtcNow.ToString("MM-dd-yyyy");
-            data.InTime = DateTime.Now.ToString("h:mm:ss");
-            data.OutTime = DateTime.Now.ToString("h:mm:ss");
+           
+            data.Date = DateTime.Now;
+            data.Status = "Present";
+            var diff = data.OutTime - data.InTime;
+            var TotalDuration = (int)diff.TotalHours;
+            data.WorkDuration = TotalDuration;
             dataContext.AttendanceModel.Add(data);
             dataContext.SaveChanges();
             return Ok(data);
-        }    
-      
+        }
+
+
+
+        [HttpGet("GetAttendance")]
+        public IActionResult GetAttendance(int data)
+        {
+            var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
+            var attendance = dataContext.AttendanceModel.Where(x => x.EmployeeId == data).AsQueryable();
+            if (user != null && user.Role == "Admin")
+            {
+                var AllUser = dataContext.AttendanceModel.AsQueryable();
+                return Ok(AllUser);
+
+            }
+            if (user != null && user.Role == "Employee")
+            {
+                return Ok(attendance);
+
+            }
+
+            return BadRequest();
+        }
 
     }
-
 }
