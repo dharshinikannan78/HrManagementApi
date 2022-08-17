@@ -1,4 +1,4 @@
-﻿    using HrMangementApi.Model;
+﻿using HrMangementApi.Model;
 using HrMangementApi.UserDbContext;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -23,8 +23,8 @@ namespace HrMangementApi.Controllers
         public IActionResult ApplyLeave([FromBody] LeaveDetails leaveData)
         {
             leaveData.ApprovalStatus = "Pending";
-            var diff = leaveData.EndDate - leaveData.StartDate;
-            var noofDays = diff.Days;
+            var diff = (leaveData.EndDate - leaveData.StartDate).TotalDays;
+            var noofDays = (int)diff + 1;
             leaveData.NoOfDays = noofDays;
             leaveData.AppliedOn = DateTime.UtcNow.Date;
             dataContext.LeaveModel.Add(leaveData);
@@ -84,5 +84,20 @@ namespace HrMangementApi.Controllers
             return BadRequest();
         }
 
+                                select new
+                                {
+                                    a.FirstName,
+                                    a.LastName,
+                                    a.Designation,
+                                    p.StartDate,
+                                    p.EndDate,
+                                    p.NoOfDays,
+                                    p.LeaveType,
+                                    p.AppliedOn,
+                                    p.Reason,
+                                    p.ApprovalStatus
+                                });
+            return Ok(LeaveDetails);
+        }
     }
 }
