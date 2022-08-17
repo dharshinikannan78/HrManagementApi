@@ -27,7 +27,7 @@ namespace HrMangementApi.Controllers
             {
                 var file = Request.Form.Files[0];
                 fileType = Request.Form["fileType"];
-                var date = DateTime.Now.Date.Month.ToString() + " " + DateTime.Now.Date.Year.ToString() + " " + DateTime.Now.Day.ToString();
+                var date = DateTime.Now.Date.Month.ToString() + "-" + DateTime.Now.Date.Year.ToString() + "-" + DateTime.Now.Day.ToString();
                 var folderName = Path.Combine("Resource", "Images", date);
                 var pathtoSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
 

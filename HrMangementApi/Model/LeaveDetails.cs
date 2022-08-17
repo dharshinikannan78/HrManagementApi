@@ -15,6 +15,6 @@ namespace HrMangementApi.Model
         public string ApprovalStatus { get; set; }
         public string Reason { get; set; }
         public int NoOfDays { get; set; }
-        public string StatusOn { get; set; }
+        public string Duration { get; set; }
     }
 }

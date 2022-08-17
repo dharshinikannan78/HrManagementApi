@@ -91,6 +91,7 @@ namespace HrMangementApi.Controllers
                                     a.Designation,
                                     p.AttachmentName,
                                     p.AttachmentType,
+                                    p.AttachmentPath,
                                     p.AttachmentId,
                                     a.AttachmentIds,
                                     a.Number,
@@ -115,7 +116,7 @@ namespace HrMangementApi.Controllers
                                     id = p.EmployeeId == null ? 0 : p.EmployeeId,
                                     name = a.StartDate,
                                     h = gc.Status,
-                                    s = a.StatusOn
+                                    
 
                                 } into g
                                 select new
@@ -123,7 +124,7 @@ namespace HrMangementApi.Controllers
                                     name = g.Key.id,
                                     h1 = g.Key.name,
                                     h2 = g.Key.h,
-                                    bh3 = g.Key.s
+                                    
                                 }).ToList();
             return Ok(allemployess);
             /* var employees = allemployess.ToList();
