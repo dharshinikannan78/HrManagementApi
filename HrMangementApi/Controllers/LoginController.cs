@@ -72,6 +72,6 @@ namespace HrMangementApi.Controllers
                 return Ok();
             }
         }
-
+       
     }
 }

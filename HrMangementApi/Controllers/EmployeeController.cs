@@ -113,15 +113,15 @@ namespace HrMangementApi.Controllers
 
                                 group gc by new
                                 {
-                                    id = p.EmployeeId == null ? 0 : p.EmployeeId,
+                                   
                                     name = a.StartDate,
                                     h = gc.Status,
-                                    
+                                    s = a.StatusOn
 
                                 } into g
                                 select new
                                 {
-                                    name = g.Key.id,
+                                   
                                     h1 = g.Key.name,
                                     h2 = g.Key.h,
                                     
@@ -130,6 +130,25 @@ namespace HrMangementApi.Controllers
             /* var employees = allemployess.ToList();
              return Ok(employees);*/
 
+        }
+        [HttpGet("GetUser")]
+        public IActionResult GetUser(int data)
+        {
+            var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
+            var employee = dataContext.EmployeeModel.Where(x => x.EmployeeId == data).FirstOrDefault();
+            if (user != null && user.Role == "Admin")
+            {
+                var AllUser = dataContext.EmployeeModel.AsQueryable();
+                return Ok(AllUser);
+
+            }
+            if (user != null && user.Role == "Employee")
+            {
+                return Ok(employee);
+
+            }
+
+            return BadRequest();
         }
     }
 }
