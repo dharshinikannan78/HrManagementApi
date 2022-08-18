@@ -33,6 +33,7 @@ namespace HrMangementApi.Controllers
         }
 
 
+
         [HttpGet("GetAllLeaveDetails")]
         public IActionResult AllLeaveDetails()
         {
