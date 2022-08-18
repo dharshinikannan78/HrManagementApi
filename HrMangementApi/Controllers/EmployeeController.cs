@@ -115,8 +115,8 @@ namespace HrMangementApi.Controllers
                                 {
                                    
                                     name = a.StartDate,
-                                    h = gc.Status,
-                                    s = a.StatusOn
+                                    h = gc.Status
+                                    
 
                                 } into g
                                 select new
