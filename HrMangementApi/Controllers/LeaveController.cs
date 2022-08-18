@@ -119,5 +119,20 @@ namespace HrMangementApi.Controllers
             return BadRequest();
         }
 
+                                select new
+                                {
+                                    a.FirstName,
+                                    a.LastName,
+                                    a.Designation,
+                                    p.StartDate,
+                                    p.EndDate,
+                                    p.NoOfDays,
+                                    p.LeaveType,
+                                    p.AppliedOn,
+                                    p.Reason,
+                                    p.ApprovalStatus
+                                });
+            return Ok(LeaveDetails);
+        }
     }
 }

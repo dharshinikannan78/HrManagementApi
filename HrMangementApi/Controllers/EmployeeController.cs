@@ -91,6 +91,7 @@ namespace HrMangementApi.Controllers
                                     a.Designation,
                                     p.AttachmentName,
                                     p.AttachmentType,
+                                    p.AttachmentPath,
                                     p.AttachmentId,
                                     a.AttachmentIds,
                                     a.Number,
@@ -115,7 +116,7 @@ namespace HrMangementApi.Controllers
                                    
                                     name = a.StartDate,
                                     h = gc.Status,
-                                   
+                                    s = a.StatusOn
 
                                 } into g
                                 select new
