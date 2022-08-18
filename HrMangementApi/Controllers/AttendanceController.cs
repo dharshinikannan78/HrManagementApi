@@ -8,6 +8,7 @@ using System;
 using System.Linq;
 namespace HrMangementApi.Controllers
 {
+    [EnableCors("AllowOrigin")]
     [Route("api/[controller]")]
     [ApiController]
     public class AttendanceController : ControllerBase
@@ -27,7 +28,7 @@ namespace HrMangementApi.Controllers
         [HttpPost("AddAttendance")]
         public IActionResult AddAttendance([FromBody] AttendanceDetails data)
         {
-           
+
             data.Date = DateTime.Now;
             data.Status = "Present";
             var diff = data.OutTime - data.InTime;
@@ -41,20 +42,45 @@ namespace HrMangementApi.Controllers
 
 
         [HttpGet("GetAttendance")]
-        public IActionResult GetAttendance(int data)
+        public IActionResult GetLeave(int data)
         {
+            var Details = (from a in dataContext.EmployeeModel
+                           join l in dataContext.AttendanceModel on a.EmployeeId equals l.EmployeeId
+                           where l.EmployeeId == data
+                           select new
+                           {
+                               a.EmployeeId,
+                               a.FirstName,
+                               a.LastName,
+                               a.Designation,
+                               l.InTime,
+                               l.OutTime,
+                               l.WorkDuration,
+                               l.Status,
+                               l.Date
+                           }).ToList();
+            var Detail = (from a in dataContext.EmployeeModel
+                          join l in dataContext.AttendanceModel on a.EmployeeId equals l.EmployeeId
+                          select new
+                          {
+                              a.EmployeeId,
+                              a.FirstName,
+                              a.LastName,
+                              a.Designation,
+                              l.InTime,
+                              l.OutTime,
+                              l.WorkDuration,
+                              l.Status,
+                              l.Date
+                          }).ToList();
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
-            var attendance = dataContext.AttendanceModel.Where(x => x.EmployeeId == data).AsQueryable();
             if (user != null && user.Role == "Admin")
             {
-                var AllUser = dataContext.AttendanceModel.AsQueryable();
-                return Ok(AllUser);
-
+                return Ok(Detail);
             }
             if (user != null && user.Role == "Employee")
             {
-                return Ok(attendance);
-
+                return Ok(Details);
             }
 
             return BadRequest();

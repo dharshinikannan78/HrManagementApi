@@ -11,6 +11,7 @@ namespace HrMangementApi.UserDbContext
         public DbSet<EmployeeDetails> EmployeeModel { get; set; }
         public DbSet<LeaveDetails> LeaveModel { get; set; }
         public DbSet<FileAttachmentModel> FileAttachment { get; set; }
+        public DbSet<TaskDetails> TaskDetails { get; set; }    
 
         protected override void OnModelCreating(ModelBuilder modelBulider)
 

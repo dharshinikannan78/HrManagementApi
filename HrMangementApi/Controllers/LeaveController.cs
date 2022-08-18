@@ -24,13 +24,14 @@ namespace HrMangementApi.Controllers
         {
             leaveData.ApprovalStatus = "Pending";
             var diff = leaveData.EndDate - leaveData.StartDate;
-            var noofDays = (int)diff.Days +1;
+            var noofDays = (int)diff.Days + 1;
             leaveData.NoOfDays = noofDays;
             leaveData.AppliedOn = DateTime.UtcNow.Date;
             dataContext.LeaveModel.Add(leaveData);
             dataContext.SaveChanges();
             return Ok(leaveData);
-                    }
+        }
+
 
         [HttpGet("GetAllLeaveDetails")]
         public IActionResult AllLeaveDetails()

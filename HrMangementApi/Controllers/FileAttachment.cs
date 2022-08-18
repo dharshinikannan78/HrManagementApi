@@ -1,5 +1,6 @@
 ﻿using HrMangementApi.Model;
 using HrMangementApi.UserDbContext;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -12,6 +13,8 @@ namespace HrMangementApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("AllowOrigin")]
+
     public class FileAttachment : ControllerBase
     {
         private readonly UserdbContext dataContext;
