@@ -3,6 +3,7 @@ using HrMangementApi.UserDbContext;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 
@@ -22,9 +23,26 @@ namespace HrMangementApi.Controllers
         [HttpPost("AddTaskDeatils")]
         public IActionResult AddTaskDeatils([FromBody] TaskDetails addTask)
         {
+            addTask.TaskStatus = "Progress";
             dataContext.TaskDetails.Add(addTask);
             dataContext.SaveChanges();
             return Ok(addTask);
+        }
+
+        [HttpPut("Update")]
+        public IActionResult UpdateEmployee([FromBody] TaskDetails addTask)
+        {
+            var res = dataContext.TaskDetails.AsNoTracking().FirstOrDefault(a => a.ProjectId == addTask.ProjectId);
+            if (res == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                dataContext.Entry(addTask).State = EntityState.Modified;
+                dataContext.SaveChanges();
+                return Ok(addTask);
+            }
         }
 
         [HttpGet("GetAllTask")]
@@ -42,13 +60,45 @@ namespace HrMangementApi.Controllers
                                 select new
                                 {
                                     a.FirstName,
-                                    b.ProjectTitle,
+                                    b.TaskName,
                                     b.EmployeeId
                                 }).ToList();
             return Ok(allemployess);
         }
+        [HttpGet("teamates")]
+        public IActionResult team(string teamates)
+        {
+            var teamate = (from a in dataContext.EmployeeModel
+                           where a.TeamName == teamates
+                           select new
+                           {
+                               a.FirstName,
+                               a.TeamName
+                           });
+            return Ok(teamate);
+
+        }
+
 
         [HttpGet("employeeId")]
+        public IActionResult getTeamTaskDetails(int id)
+        {
+            var allemployess = (from a in dataContext.EmployeeModel
+                                join b in dataContext.TaskDetails on a.EmployeeId equals b.EmployeeId
+                                where b.AssigingId == id
+                                select new
+                                {
+                                    a.FirstName,
+                                    b.TaskName,
+                                    b.TaskDescription,
+                                    b.TaskStatus,
+                                    b.EmployeeId,
+                                    b.AssigingId
+
+                                }).ToList();
+            return Ok(allemployess);
+        }
+        [HttpGet("getemployeeId")]
         public IActionResult getParticulaDetails(int id)
         {
             var allemployess = (from a in dataContext.EmployeeModel
@@ -57,23 +107,26 @@ namespace HrMangementApi.Controllers
                                 select new
                                 {
                                     a.FirstName,
-                                    b.ProjectTitle,
-                                    b.EmployeeId
+                                    b.TaskName,
+                                    b.TaskDescription,
+                                    b.TaskStatus,
+                                    b.EmployeeId,
+                                    b.AssigingId
+
                                 }).ToList();
             return Ok(allemployess);
         }
 
-        [HttpGet("projectTitle")]
-        public IActionResult projectTitle(string projectTitle)
+
+        [HttpGet("Team")]
+        public IActionResult projectTitle(string team)
         {
             var allemployess = (from a in dataContext.EmployeeModel
-                                join b in dataContext.TaskDetails on a.EmployeeId equals b.EmployeeId
-                                where b.ProjectTitle == projectTitle
+                                where a.Position == team
                                 select new
                                 {
                                     a.FirstName,
-                                    b.ProjectTitle,
-                                    b.EmployeeId
+
                                 }).ToList();
             return Ok(allemployess);
 

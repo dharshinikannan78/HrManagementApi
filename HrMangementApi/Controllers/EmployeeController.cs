@@ -1,5 +1,6 @@
 ﻿using HrMangementApi.Model;
 using HrMangementApi.UserDbContext;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -113,18 +114,17 @@ namespace HrMangementApi.Controllers
 
                                 group gc by new
                                 {
-                                   
+
                                     name = a.StartDate,
                                     h = gc.Status,
-                                    s = a.StatusOn
 
                                 } into g
                                 select new
                                 {
-                                   
+
                                     h1 = g.Key.name,
                                     h2 = g.Key.h,
-                                    
+
                                 }).ToList();
             return Ok(allemployess);
             /* var employees = allemployess.ToList();
@@ -132,6 +132,7 @@ namespace HrMangementApi.Controllers
 
         }
         [HttpGet("GetUser")]
+        /*[Authorize]*/
         public IActionResult GetUser(int data)
         {
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
