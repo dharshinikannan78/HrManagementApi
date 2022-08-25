@@ -10,17 +10,22 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace HrMangementApi
 {
     public class Startup
     {
+        private const string SECRET_KEY = "DDFslkgdkgdlmlgkhlkghSDSDkdghjhgkhkglkasjdklajsfkljdsklgjsrjtoriupoeropterp";
+        public static readonly SymmetricSecurityKey SIGNING_KEY = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SECRET_KEY));
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -42,7 +47,25 @@ namespace HrMangementApi
                         /*.WithExposedHeaders("Content-Disposition", "downloadfilename");*/
                     });
             });
-            
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "jwtBearer";
+                options.DefaultChallengeScheme = "jwtBearer";
+
+            })
+          .AddJwtBearer("jwtBearer", jwtOption =>
+          {
+              jwtOption.TokenValidationParameters = new TokenValidationParameters()
+              {
+                  IssuerSigningKey = SIGNING_KEY,
+                  ValidateIssuer = true,
+                  ValidateAudience = true,
+                  ValidIssuer = "https://localhost:44394",
+                  ValidAudience = "https://localhost:44394",
+                  ValidateLifetime = true,
+              };
+
+          });
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
