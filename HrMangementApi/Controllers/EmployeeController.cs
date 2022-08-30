@@ -133,18 +133,14 @@ namespace HrMangementApi.Controllers
 
                                 group gc by new
                                 {
-
                                     name = a.StartDate,
                                     h = gc.Status
-                                    
 
                                 } into g
                                 select new
                                 {
-
                                     h1 = g.Key.name,
                                     h2 = g.Key.h,
-
                                 }).ToList();
             return Ok(allemployess);
             /* var employees = allemployess.ToList();
