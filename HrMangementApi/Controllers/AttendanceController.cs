@@ -29,16 +29,34 @@ namespace HrMangementApi.Controllers
         public IActionResult AddAttendance([FromBody] AttendanceDetails data)
         {
 
-            data.Date = DateTime.Now;
-            data.Status = "Present";
-            var diff = data.OutTime - data.InTime;
-            var TotalDuration = (int)diff.TotalHours;
-            data.WorkDuration = TotalDuration;
+
+            data.InTime = DateTime.Now;
             dataContext.AttendanceModel.Add(data);
             dataContext.SaveChanges();
             return Ok(data);
+
         }
 
+
+        [HttpPut("updateAttendance")]
+        public IActionResult updateAttendance([FromBody] AttendanceDetails data)
+        {
+            try
+            {
+                var update = dataContext.AttendanceModel.FirstOrDefault(a => a.AttendanceId == data.AttendanceId);
+                if (update != null)
+                {
+                    update.OutTime = data.OutTime;
+                    dataContext.AttendanceModel.Update(update);
+                    dataContext.SaveChanges();
+                }
+                return Ok(update);
+            }
+            catch (Exception e)
+            {
+                return BadRequest();
+            }
+        }
 
 
         [HttpGet("GetAttendance")]
@@ -55,9 +73,8 @@ namespace HrMangementApi.Controllers
                                a.Designation,
                                l.InTime,
                                l.OutTime,
-                               l.WorkDuration,
-                               l.Status,
-                               l.Date
+                               l.AttendanceId
+
                            }).ToList();
             var Detail = (from a in dataContext.EmployeeModel
                           join l in dataContext.AttendanceModel on a.EmployeeId equals l.EmployeeId
@@ -69,9 +86,10 @@ namespace HrMangementApi.Controllers
                               a.Designation,
                               l.InTime,
                               l.OutTime,
-                              l.WorkDuration,
-                              l.Status,
-                              l.Date
+                              l.AttendanceId
+
+
+
                           }).ToList();
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
             if (user != null && user.Role == "Admin")
@@ -85,6 +103,50 @@ namespace HrMangementApi.Controllers
 
             return BadRequest();
         }
+        [HttpGet("GetTimeOff")]
+        public IActionResult GetTimeOff(int id)
+        {
+            var attendance = from l in dataContext.LoginModels
+                             join e in dataContext.EmployeeModel on l.EmployeeId equals e.EmployeeId
+                             join a in dataContext.AttendanceModel on l.EmployeeId equals a.EmployeeId
 
+
+                             select new
+                             {
+                                 l.EmployeeId,
+                                 e.FirstName,
+                                 e.LastName,
+                                 e.Designation,
+                                 a.InTime,
+                                 a.OutTime,
+                                 a.WorkDuration,
+
+                             };
+            var leave = from l in dataContext.LoginModels
+                        join e in dataContext.EmployeeModel on l.EmployeeId equals e.EmployeeId
+
+                        join le in dataContext.LeaveModel on l.EmployeeId equals le.EmployeeId
+                        where l.EmployeeId == id && le.ApprovalStatus == "Approved"
+
+                        select new
+                        {
+                            l.EmployeeId,
+                            e.FirstName,
+                            e.LastName,
+                            e.Designation,
+                            le.ApprovalStatus,
+                            le.LeaveType,
+                            le.StartDate,
+                            le.EndDate,
+                            le.LeaveId
+
+
+                        };
+
+
+            return Ok(attendance);
+
+
+        }
     }
 }
