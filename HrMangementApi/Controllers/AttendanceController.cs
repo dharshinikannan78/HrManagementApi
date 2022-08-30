@@ -52,9 +52,9 @@ namespace HrMangementApi.Controllers
                 }
                 return Ok(update);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest(ex);
             }
         }
 

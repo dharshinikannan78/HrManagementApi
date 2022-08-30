@@ -65,27 +65,27 @@ namespace HrMangementApi.Controllers
                                 }).ToList();
             return Ok(allemployess);
         }
-        [HttpGet("teamates")]
-        public IActionResult team(string teamates)
+        [HttpGet("teamName")]
+        public IActionResult team(string teamName)
         {
             var teamate = (from a in dataContext.EmployeeModel
-                           where a.TeamName == teamates
+                           where a.TeamName == teamName
                            select new
                            {
                                a.FirstName,
-                               a.TeamName
+                               a.TeamName,
+                               
                            });
             return Ok(teamate);
 
         }
 
-
-        [HttpGet("employeeId")]
-        public IActionResult getTeamTaskDetails(int id)
+        [HttpGet("AssigingId")]
+        public IActionResult getTeamTaskDetails(int AssigingId)
         {
             var allemployess = (from a in dataContext.EmployeeModel
                                 join b in dataContext.TaskDetails on a.EmployeeId equals b.EmployeeId
-                                where b.AssigingId == id
+                                where b.AssigingId == AssigingId
                                 select new
                                 {
                                     a.FirstName,
@@ -98,12 +98,12 @@ namespace HrMangementApi.Controllers
                                 }).ToList();
             return Ok(allemployess);
         }
-        [HttpGet("getemployeeId")]
-        public IActionResult getParticulaDetails(int id)
+        [HttpGet("EmployeeId")]
+        public IActionResult getParticulaDetails(int EmployeeId)
         {
             var allemployess = (from a in dataContext.EmployeeModel
                                 join b in dataContext.TaskDetails on a.EmployeeId equals b.EmployeeId
-                                where b.EmployeeId == id
+                                where b.EmployeeId == EmployeeId
                                 select new
                                 {
                                     a.FirstName,
@@ -118,18 +118,6 @@ namespace HrMangementApi.Controllers
         }
 
 
-        [HttpGet("Team")]
-        public IActionResult projectTitle(string team)
-        {
-            var allemployess = (from a in dataContext.EmployeeModel
-                                where a.Position == team
-                                select new
-                                {
-                                    a.FirstName,
-
-                                }).ToList();
-            return Ok(allemployess);
-
-        }
+       
     }
 }

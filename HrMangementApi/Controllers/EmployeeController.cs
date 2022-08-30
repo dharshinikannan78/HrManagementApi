@@ -90,9 +90,7 @@ namespace HrMangementApi.Controllers
                                     a.LastName,
                                     a.JoiningDate,
                                     a.Designation,
-                                    p.AttachmentName,
-                                    p.AttachmentType,
-                                    p.AttachmentPath,
+                                   
                                     p.AttachmentId,
                                     a.AttachmentIds,
                                     a.Number,
