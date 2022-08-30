@@ -23,6 +23,5 @@ namespace HrMangementApi.Model
         public string Position { get; set; }
 
 
-
     }
 }
