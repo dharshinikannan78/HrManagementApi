@@ -119,5 +119,6 @@ namespace HrMangementApi.Controllers
             return BadRequest();
         }
 
-        }
+                               
     }
+}

@@ -1,5 +1,6 @@
 ﻿using HrMangementApi.Model;
 using HrMangementApi.UserDbContext;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -150,6 +151,7 @@ namespace HrMangementApi.Controllers
 
         }
         [HttpGet("GetUser")]
+        /*[Authorize]*/
         public IActionResult GetUser(int data)
         {
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
