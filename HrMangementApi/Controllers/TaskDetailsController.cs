@@ -65,6 +65,7 @@ namespace HrMangementApi.Controllers
                                 }).ToList();
             return Ok(allemployess);
         }
+
         [HttpGet("teamName")]
         public IActionResult team(string teamName)
         {
@@ -74,7 +75,7 @@ namespace HrMangementApi.Controllers
                            {
                                a.FirstName,
                                a.TeamName,
-                               
+
                            });
             return Ok(teamate);
 
@@ -98,6 +99,7 @@ namespace HrMangementApi.Controllers
                                 }).ToList();
             return Ok(allemployess);
         }
+
         [HttpGet("EmployeeId")]
         public IActionResult getParticulaDetails(int EmployeeId)
         {
@@ -116,8 +118,5 @@ namespace HrMangementApi.Controllers
                                 }).ToList();
             return Ok(allemployess);
         }
-
-
-       
     }
 }
