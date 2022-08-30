@@ -68,7 +68,7 @@ namespace HrMangementApi.Controllers
             }
         }
 
-        [HttpGet("GetEmployeeDetailsById")]
+        [HttpGet]
         public IActionResult GetEmployeeDetailsById(int id)
         {
             var res = (from a in dataContext.EmployeeModel
@@ -121,7 +121,7 @@ namespace HrMangementApi.Controllers
             return Ok(employees);
 
         }
-        [HttpGet("EmployeeDetails")]
+        /*[HttpGet("EmployeeDetails")]
         public IActionResult GetAttendance(int id)
         {
 
@@ -133,27 +133,29 @@ namespace HrMangementApi.Controllers
 
                                 group gc by new
                                 {
-                                    name = a.StartDate,
-                                    h = gc.Status
+                                    name = a.StartDate
+                                   
+
 
                                 } into g
                                 select new
                                 {
                                     h1 = g.Key.name,
+                                 
+
                                     h2 = g.Key.h,
                                 }).ToList();
             return Ok(allemployess);
-            /* var employees = allemployess.ToList();
-             return Ok(employees);*/
+            *//* var employees = allemployess.ToList();
+             return Ok(employees);*//*
 
-        }
+        }*/
         [HttpGet("GetUser")]
         /*[Authorize]*/
         public IActionResult GetUser(int data)
         {
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
-            var Employee = dataContext.EmployeeModel.Where(x => x.EmployeeId == data).FirstOrDefault();
-
+            var employee = dataContext.EmployeeModel.Where(x => x.EmployeeId == data).FirstOrDefault();
             if (user != null && user.Role == "Admin")
             {
                 var res = (from a in dataContext.EmployeeModel
