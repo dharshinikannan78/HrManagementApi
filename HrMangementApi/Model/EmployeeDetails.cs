@@ -19,6 +19,8 @@ namespace HrMangementApi.Model
         public string EmployeeReferenceNo { get; set; }
         public string WorkMode { get; set; }
         public string AttachmentIds { get; set; }
+        public string TeamName { get; set; }
+        public string Position { get; set; }
 
 
     }

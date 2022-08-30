@@ -23,14 +23,17 @@ namespace HrMangementApi.Controllers
         public IActionResult ApplyLeave([FromBody] LeaveDetails leaveData)
         {
             leaveData.ApprovalStatus = "Pending";
-            var diff = (leaveData.EndDate - leaveData.StartDate).TotalDays;
-            var noofDays = (int)diff + 1;
+            var diff = leaveData.EndDate - leaveData.StartDate;
+            var noofDays = (int)diff.Days + 1;
             leaveData.NoOfDays = noofDays;
             leaveData.AppliedOn = DateTime.UtcNow.Date;
             dataContext.LeaveModel.Add(leaveData);
             dataContext.SaveChanges();
             return Ok(leaveData);
         }
+
+
+
         [HttpGet("GetAllLeaveDetails")]
         public IActionResult AllLeaveDetails()
         {
@@ -64,21 +67,53 @@ namespace HrMangementApi.Controllers
                 return Ok();
             }
         }
+
         [HttpGet("GetLeave")]
         public IActionResult GetLeave(int data)
         {
+            var Details = (from a in dataContext.EmployeeModel
+                           join l in dataContext.LeaveModel on a.EmployeeId equals l.EmployeeId
+                           where l.EmployeeId == data
+                           select new
+                           {
+                               a.EmployeeId,
+                               a.FirstName,
+                               a.LastName,
+                               a.Designation,
+                               l.StartDate,
+                               l.EndDate,
+                               l.NoOfDays,
+                               l.AppliedOn,
+                               l.Reason,
+                               l.LeaveType,
+                               l.LeaveId,
+                               l.ApprovalStatus
+                           });
+            var Detail = (from a in dataContext.EmployeeModel
+                          join l in dataContext.LeaveModel on a.EmployeeId equals l.EmployeeId
+                          select new
+                          {
+                              a.EmployeeId,
+                              a.FirstName,
+                              a.LastName,
+                              a.Designation,
+                              l.StartDate,
+                              l.EndDate,
+                              l.NoOfDays,
+                              l.AppliedOn,
+                              l.Reason,
+                              l.LeaveType,
+                              l.LeaveId,
+                              l.ApprovalStatus
+                          }).ToList();
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
-            var leave = dataContext.LeaveModel.Where(x => x.EmployeeId == data).AsQueryable();
             if (user != null && user.Role == "Admin")
             {
-                var AllUser = dataContext.LeaveModel.AsQueryable();
-                return Ok(AllUser);
-
+                return Ok(Detail);
             }
             if (user != null && user.Role == "Employee")
             {
-                return Ok(leave);
-
+                return Ok(Details);
             }
 
             return BadRequest();

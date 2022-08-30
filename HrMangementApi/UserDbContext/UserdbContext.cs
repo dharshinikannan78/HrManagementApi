@@ -11,6 +11,11 @@ namespace HrMangementApi.UserDbContext
         public DbSet<EmployeeDetails> EmployeeModel { get; set; }
         public DbSet<LeaveDetails> LeaveModel { get; set; }
         public DbSet<FileAttachmentModel> FileAttachment { get; set; }
+        public DbSet<TaskDetails> TaskDetails { get; set; }
+        public DbSet<TokenRequest> TokenDetails { get; set; }
+        public DbSet<ProjectDetails> ProjectDetail { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBulider)
 
@@ -20,6 +25,9 @@ namespace HrMangementApi.UserDbContext
             modelBulider.Entity<EmployeeDetails>().ToTable("employee_details");
             modelBulider.Entity<LeaveDetails>().ToTable("leave_details");
             modelBulider.Entity<FileAttachmentModel>().ToTable("attachment_file");
+            modelBulider.Entity<TaskDetails>().ToTable("task_details");
+            modelBulider.Entity<TokenRequest>().ToTable("token_details");
+            modelBulider.Entity<ProjectDetails>().ToTable("project_details");
         }
     }
 }

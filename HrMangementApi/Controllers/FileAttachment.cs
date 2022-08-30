@@ -1,5 +1,6 @@
 ﻿using HrMangementApi.Model;
 using HrMangementApi.UserDbContext;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -12,9 +13,18 @@ namespace HrMangementApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("AllowOrigin")]
+
     public class FileAttachment : ControllerBase
     {
         private readonly UserdbContext dataContext;
+        private string photoFileName;
+        private string photoPathForDb;
+        private string resumeFileName;
+        private string resumePathForDb;
+        private string certFileName;
+        private string certPathForDb;
+
         public FileAttachment(UserdbContext _dataContext)
         {
             dataContext = _dataContext;
@@ -23,48 +33,63 @@ namespace HrMangementApi.Controllers
 
         public IActionResult UploadFileAttachment(IFormFile files, string fileType)
         {
-            try
+            for (int i = 0; i < Request.Form.Files.Count; ++i)
             {
-                var file = Request.Form.Files[0];
-                fileType = Request.Form["fileType"];
+                var file = Request.Form.Files[i];
                 var date = DateTime.Now.Date.Month.ToString() + "-" + DateTime.Now.Date.Year.ToString() + "-" + DateTime.Now.Day.ToString();
-                var folderName = Path.Combine("Resource", "Images", date);
-                var pathtoSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
-
-                if (file.Length > 0)
+                if (file.Name == "image")
                 {
-                    Directory.CreateDirectory(pathtoSave);
-                    var fileName = file.FileName.Trim('"');
-                    var fullPath = Path.Combine(pathtoSave, fileName).ToString();
-                    var fileExtension = Path.GetExtension(fileName);
-                    var dbpath = Path.Combine(folderName, fileName);
-                    var filePathAttachment = Path.Combine(folderName, fileName).ToString();
-                    using (var stream = new FileStream(fullPath, FileMode.Append))
+                    photoFileName = file.FileName;
+                    photoPathForDb = Path.Combine("Resource", "Images", date, photoFileName);
+                    var photoFolderName = Path.Combine(Directory.GetCurrentDirectory(), "Resource", "Images", date);
+                    Directory.CreateDirectory(photoFolderName);
+                    var photoPath = Path.Combine(photoFolderName, photoFileName).ToString();
+                    using (var stream = new FileStream(photoPath, FileMode.Append))
                     {
                         file.CopyTo(stream);
                     }
-                    var fileDetails = SaveFileToDB(fileName, fileType, filePathAttachment);
-
-                    return Ok(fileDetails);
                 }
-
-                return BadRequest();
+                else if (file.Name == "resume")
+                {
+                    resumeFileName = file.FileName;
+                    resumePathForDb = Path.Combine("Resource", "Images", date, resumeFileName);
+                    var resumeFolderName = Path.Combine(Directory.GetCurrentDirectory(), "Resource", "Images", date);
+                    Directory.CreateDirectory(resumeFolderName);
+                    var photoPath = Path.Combine(resumeFolderName, resumeFileName).ToString();
+                    using (var stream = new FileStream(photoPath, FileMode.Append))
+                    {
+                        file.CopyTo(stream);
+                    }
+                }
+                else
+                {
+                    certFileName = file.FileName;
+                    certPathForDb = Path.Combine("Resource", "Images", date, certFileName);
+                    var certFolderName = Path.Combine(Directory.GetCurrentDirectory(), "Resource", "Images", date);
+                    Directory.CreateDirectory(certFolderName);
+                    var photoPath = Path.Combine(certFolderName, certFileName).ToString();
+                    using (var stream = new FileStream(photoPath, FileMode.Append))
+                    {
+                        file.CopyTo(stream);
+                    }
+                }
             }
+            var fileDetails = SaveFileToDB(photoFileName, photoPathForDb, resumeFileName, resumePathForDb, certFileName, certPathForDb);
 
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
+            return Ok(fileDetails);
         }
-        private FileAttachmentModel SaveFileToDB(string fileName, string fileType, string filePathAttachment)
+        private FileAttachmentModel SaveFileToDB(string photoName, string photoPath, string resumeName, string resumePath, string certificateName, string certificatePath)
         {
             var objFiles = new FileAttachmentModel()
             {
                 AttachmentId = 0,
-                AttachmentName = fileName,
-                AttachmentType = fileType,
-                AttachmentPath = filePathAttachment
+                PhotoName = photoName,
+                PhotoPath = photoPath,
+                ResumeName = resumeName,
+                ResumePath = resumePath,
+                CertificateName = certificateName,
+                CertificatePath = certificatePath
+
             };
 
             dataContext.FileAttachment.Add(objFiles);
@@ -105,7 +130,7 @@ namespace HrMangementApi.Controllers
         public IActionResult DownloadFileAttachment(int id)
         {
             var file = dataContext.FileAttachment.Where(n => n.AttachmentId == id).FirstOrDefault();
-            var filepath = Path.Combine(Directory.GetCurrentDirectory(), file.AttachmentPath);
+            var filepath = Path.Combine(Directory.GetCurrentDirectory(), file.PhotoPath);
             if (!System.IO.File.Exists(filepath))
                 return NotFound();
             var memory = new MemoryStream();
@@ -129,7 +154,7 @@ namespace HrMangementApi.Controllers
 
             return contentType;
         }
-        
+
     }
 
 }
