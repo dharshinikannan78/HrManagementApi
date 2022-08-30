@@ -20,6 +20,5 @@ namespace HrMangementApi.Model
         public string WorkMode { get; set; }
         public string AttachmentIds { get; set; }
 
-
     }
 }

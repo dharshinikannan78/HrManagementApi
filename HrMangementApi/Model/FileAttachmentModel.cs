@@ -8,11 +8,13 @@ namespace HrMangementApi.Model
 
         public int AttachmentId { get; set; }
         [MaxLength(100)]
-        public string AttachmentName { get; set; }
+        public string PhotoName { get; set; }
         [MaxLength(100)]
-        public string AttachmentType { get; set; }
+        public string PhotoPath { get; set; }
         [MaxLength(500)]
-        public string AttachmentPath { get; set; }
-        public string EmployeePhoto { get; set; }
+        public string ResumeName { get; set; }
+        public string ResumePath { get; set; }
+        public string CertificateName { get; set; }
+        public string CertificatePath { get; set; }
     }
 }

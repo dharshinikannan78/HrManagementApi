@@ -67,10 +67,30 @@ namespace HrMangementApi.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("GetEmployeeDetailsById")]
         public IActionResult GetEmployeeDetailsById(int id)
         {
-            var res = dataContext.EmployeeModel.AsNoTracking().FirstOrDefault(a => a.EmployeeId == id);
+            var res = (from a in dataContext.EmployeeModel
+                       join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
+                       where a.EmployeeId == id
+
+                       select new
+                       {
+                           a.FirstName,
+                           a.LastName,
+                           a.Gender,
+                           a.Designation,
+                           a.Address,
+                           a.Number,
+                           a.EmailId,
+                           a.DOB,
+                           a.JoiningDate,
+                           a.EmployeeReferenceNo,
+                           a.WorkMode,
+                           p.PhotoName,
+                           p.PhotoPath
+
+                       }).ToList();
             return Ok(res);
 
         }
@@ -89,9 +109,8 @@ namespace HrMangementApi.Controllers
                                     a.LastName,
                                     a.JoiningDate,
                                     a.Designation,
-                                    p.AttachmentName,
-                                    p.AttachmentType,
-                                    p.AttachmentPath,
+                                    p.PhotoName,
+                                    p.PhotoPath,
                                     p.AttachmentId,
                                     a.AttachmentIds,
                                     a.Number,
@@ -113,18 +132,17 @@ namespace HrMangementApi.Controllers
 
                                 group gc by new
                                 {
-                                   
+
                                     name = a.StartDate,
                                     h = gc.Status,
-                                    s = a.StatusOn
 
                                 } into g
                                 select new
                                 {
-                                   
+
                                     h1 = g.Key.name,
                                     h2 = g.Key.h,
-                                    
+
                                 }).ToList();
             return Ok(allemployess);
             /* var employees = allemployess.ToList();
@@ -135,16 +153,56 @@ namespace HrMangementApi.Controllers
         public IActionResult GetUser(int data)
         {
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
-            var employee = dataContext.EmployeeModel.Where(x => x.EmployeeId == data).FirstOrDefault();
+            var Employee = dataContext.EmployeeModel.Where(x => x.EmployeeId == data).FirstOrDefault();
+
             if (user != null && user.Role == "Admin")
             {
-                var AllUser = dataContext.EmployeeModel.AsQueryable();
-                return Ok(AllUser);
+                var res = (from a in dataContext.EmployeeModel
+                           join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
+
+                           select new
+                           {
+                               a.FirstName,
+                               a.LastName,
+                               a.Gender,
+                               a.Designation,
+                               a.Address,
+                               a.Number,
+                               a.EmailId,
+                               a.DOB,
+                               a.JoiningDate,
+                               a.EmployeeReferenceNo,
+                               a.WorkMode,
+                               p.PhotoName,
+                               p.PhotoPath
+                           }).ToList();
+
+                return Ok(res);
 
             }
             if (user != null && user.Role == "Employee")
             {
-                return Ok(employee);
+                var res = (from a in dataContext.EmployeeModel
+                           join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
+                           where a.EmployeeId == data
+
+                           select new
+                           {
+                               a.FirstName,
+                               a.LastName,
+                               a.Gender,
+                               a.Designation,
+                               a.Address,
+                               a.Number,
+                               a.EmailId,
+                               a.DOB,
+                               a.JoiningDate,
+                               a.EmployeeReferenceNo,
+                               a.WorkMode,
+                               p.PhotoName,
+                               p.PhotoPath
+                           }).ToList();
+                return Ok(res);
 
             }
 
