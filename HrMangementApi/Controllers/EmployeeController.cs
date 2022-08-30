@@ -68,7 +68,7 @@ namespace HrMangementApi.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("GetEmployeeDetailsById")]
         public IActionResult GetEmployeeDetailsById(int id)
         {
             var res = (from a in dataContext.EmployeeModel
