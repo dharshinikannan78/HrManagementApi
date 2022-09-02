@@ -8,6 +8,7 @@ namespace HrMangementApi.Model
         [Key]
         public int ProjectId { get; set; }
         public int AssiginedId { get; set; }
+        public string ProjectName { get; set; }
         public string ProjectTitle { get; set; }
         public string ProjectDescription { get; set; }
 

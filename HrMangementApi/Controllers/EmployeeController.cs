@@ -136,7 +136,7 @@ namespace HrMangementApi.Controllers
 
                                     name = a.StartDate,
                                     h = gc.Status
-                                    
+
 
                                 } into g
                                 select new
@@ -165,6 +165,7 @@ namespace HrMangementApi.Controllers
 
                            select new
                            {
+                               a.EmployeeId,
                                a.FirstName,
                                a.LastName,
                                a.Gender,
@@ -191,6 +192,7 @@ namespace HrMangementApi.Controllers
 
                            select new
                            {
+                               a.EmployeeId,
                                a.FirstName,
                                a.LastName,
                                a.Gender,

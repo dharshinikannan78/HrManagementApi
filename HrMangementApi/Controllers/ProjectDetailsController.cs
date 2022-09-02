@@ -67,23 +67,28 @@ namespace HrMangementApi.Controllers
             var details = from t1 in dataContext.ProjectDetail
                           join t2 in dataContext.EmployeeModel on t1.ProjectTitle equals t2.TeamName into groupcls
                           from gc in groupcls.DefaultIfEmpty()
-                          where t1.ProjectTitle == projectTitle
+                          where t1.ProjectName == projectTitle
                           group gc by new
                           {
                               ProjectId = t1.ProjectId == null ? 0 : t1.ProjectId,
                               ProjectTitle = t1.ProjectTitle == null ? "no value" : t1.ProjectTitle,
+                              ProjectName = t1.ProjectName == null ? "no value" : t1.ProjectName,
                               AssignedId = t1.AssiginedId == null ? 0 : t1.AssiginedId,
                               CreatedBy = t1.CreateBy == null ? "no value" : t1.CreateBy,
+                              StartDate = t1.StartDate,
+                              ProjectStatus = t1.ProjectStatus == null ? "no value" : t1.ProjectStatus,
                               ProjectDescription = t1.ProjectDescription == null ? "no value" : t1.ProjectDescription,
                           } into g
                           select new
                           {
                               projectId = g.Key.ProjectId,
                               ProjectTitle = g.Key.ProjectTitle,
+                              ProjectName = g.Key.ProjectName,
                               AssignedId = g.Key.AssignedId,
                               CreatedBy = g.Key.CreatedBy,
+                              StartDate = g.Key.StartDate,
+                              ProjectStatus = g.Key.ProjectStatus,
                               ProjectDescription = g.Key.ProjectDescription,
-
                           };
             return Ok(details);
         }
@@ -96,7 +101,8 @@ namespace HrMangementApi.Controllers
                                 select new
                                 {
                                     a.FirstName,
-                                    a.TeamName
+                                    a.TeamName,
+
 
                                 }).ToList();
             return Ok(allemployess);
