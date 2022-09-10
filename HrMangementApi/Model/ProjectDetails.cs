@@ -17,7 +17,8 @@ namespace HrMangementApi.Model
         public string ProjectStatus { get; set; }
 
         public DateTime EndDate { get; set; }
-        public string CreateBy { get; set; }
+        public string TodayDays { get; set; }
+        public string CreatedBy { get; set; }
 
 
     }

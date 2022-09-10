@@ -21,6 +21,7 @@ namespace HrMangementApi.Model
         public string AttachmentIds { get; set; }
         public string TeamName { get; set; }
         public string Position { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
 
     }

@@ -36,7 +36,7 @@ namespace HrMangementApi.Controllers
             return Ok(employeeData);
         }
 
-        [HttpDelete("DeleteEmployee")]
+        /*[HttpDelete("DeleteEmployee")]
         public IActionResult DeletEmployee(int id)
         {
             var delete = dataContext.LoginModels.Find(id);
@@ -50,7 +50,7 @@ namespace HrMangementApi.Controllers
                 dataContext.SaveChanges();
                 return Ok();
             }
-        }
+        }*/
 
         [HttpPut("Update")]
         public IActionResult UpdateEmployee([FromBody] EmployeeDetails EmployeeData)
@@ -116,12 +116,14 @@ namespace HrMangementApi.Controllers
                                     a.AttachmentIds,
                                     a.Number,
                                     a.EmailId,
+                                    a.TeamName,
+                                    a.Position
                                 }).ToList();
             var employees = allemployess.ToList();
             return Ok(employees);
 
         }
-        [HttpGet("EmployeeDetails")]
+        /*[HttpGet("EmployeeDetails")]
         public IActionResult GetAttendance(int id)
         {
 
@@ -133,36 +135,41 @@ namespace HrMangementApi.Controllers
 
                                 group gc by new
                                 {
+                                    name = a.StartDate
+                                   
 
+<<<<<<< HEAD
                                     name = a.StartDate,
                                     h = gc.Status
 
+=======
+>>>>>>> master
 
                                 } into g
                                 select new
                                 {
-
                                     h1 = g.Key.name,
-                                    h2 = g.Key.h,
+                                 
 
+                                    h2 = g.Key.h,
                                 }).ToList();
             return Ok(allemployess);
-            /* var employees = allemployess.ToList();
-             return Ok(employees);*/
+            *//* var employees = allemployess.ToList();
+             return Ok(employees);*//*
 
-        }
+        }*/
         [HttpGet("GetUser")]
         /*[Authorize]*/
         public IActionResult GetUser(int data)
         {
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
-            var Employee = dataContext.EmployeeModel.Where(x => x.EmployeeId == data).FirstOrDefault();
-
+            var employee = dataContext.EmployeeModel.Where(x => x.EmployeeId == data).FirstOrDefault();
             if (user != null && user.Role == "Admin")
             {
                 var res = (from a in dataContext.EmployeeModel
                            join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
-
+                           where a.IsDeleted == false
+                           orderby a.EmployeeId descending
                            select new
                            {
                                a.EmployeeId,
@@ -178,17 +185,19 @@ namespace HrMangementApi.Controllers
                                a.EmployeeReferenceNo,
                                a.WorkMode,
                                p.PhotoName,
-                               p.PhotoPath
+                               p.PhotoPath,
+                               a.TeamName,
+                               a.Position
                            }).ToList();
 
                 return Ok(res);
 
             }
-            if (user != null && user.Role == "Employee")
+            if (user != null && (user.Role == "TeamLeader" || user.Role == "TeamMember"))
             {
                 var res = (from a in dataContext.EmployeeModel
                            join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
-                           where a.EmployeeId == data
+                           where a.EmployeeId == data && a.IsDeleted == false
 
                            select new
                            {
@@ -205,7 +214,9 @@ namespace HrMangementApi.Controllers
                                a.EmployeeReferenceNo,
                                a.WorkMode,
                                p.PhotoName,
-                               p.PhotoPath
+                               p.PhotoPath,
+                               a.TeamName,
+                               a.Position
                            }).ToList();
                 return Ok(res);
 
@@ -213,5 +224,27 @@ namespace HrMangementApi.Controllers
 
             return BadRequest();
         }
+        [HttpDelete("DeleteEmployee")]
+        public IActionResult DeleteEmployee(int Id)
+        {
+            var employee = dataContext.EmployeeModel.Where(a => a.EmployeeId == Id).FirstOrDefault();
+            var user = dataContext.LoginModels.Where(a => a.EmployeeId == Id).FirstOrDefault();
+            if ((employee != null && employee.IsDeleted == false) && user == null)
+            {
+                employee.IsDeleted = true;
+                dataContext.SaveChanges();
+                return Ok();
+            }
+            if ((employee != null && employee.IsDeleted == false))
+            {
+                employee.IsDeleted = true;
+                user.IsDeleted = true;
+                dataContext.SaveChanges();
+                return Ok();
+            }
+
+            return BadRequest();
+        }
     }
 }
+

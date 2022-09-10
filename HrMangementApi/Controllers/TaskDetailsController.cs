@@ -23,7 +23,7 @@ namespace HrMangementApi.Controllers
         [HttpPost("AddTaskDeatils")]
         public IActionResult AddTaskDeatils([FromBody] TaskDetails addTask)
         {
-            addTask.TaskStatus = "Progress";
+            addTask.TaskStatus = "InProgress";
             dataContext.TaskDetails.Add(addTask);
             dataContext.SaveChanges();
             return Ok(addTask);
@@ -39,6 +39,7 @@ namespace HrMangementApi.Controllers
             }
             else
             {
+                
                 dataContext.Entry(addTask).State = EntityState.Modified;
                 dataContext.SaveChanges();
                 return Ok(addTask);

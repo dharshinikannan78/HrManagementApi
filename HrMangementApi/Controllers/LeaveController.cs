@@ -23,6 +23,7 @@ namespace HrMangementApi.Controllers
         public IActionResult ApplyLeave([FromBody] LeaveDetails leaveData)
         {
             leaveData.ApprovalStatus = "Pending";
+            leaveData.Status = "Leave";
             var diff = leaveData.EndDate - leaveData.StartDate;
             var noofDays = (int)diff.Days + 1;
             leaveData.NoOfDays = noofDays;

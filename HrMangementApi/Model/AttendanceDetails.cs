@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HrMangementApi.Model
 {
@@ -13,9 +14,7 @@ namespace HrMangementApi.Model
         public DateTime InTime { get; set; }
         public DateTime OutTime { get; set; }
         public int WorkDuration { get; set; }
-        public int OverTimeDuration { get; set; }
-        public string Location { get; set; }
-
+        public string OverTimeDuration { get; set; }
 
     }
 }

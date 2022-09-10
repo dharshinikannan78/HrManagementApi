@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 
@@ -29,21 +30,35 @@ namespace HrMangementApi.Controllers
             return Ok(taskDetail);
         }
 
-        [HttpPut("UpdateTaskDetails")]
-        public IActionResult UpdateProjectDetails([FromBody] ProjectDetails taskDetail)
+        [HttpGet("ProjectId")]
+        public IActionResult GetByProjectId(int projectId)
         {
-            var details = dataContext.ProjectDetail.AsNoTracking().FirstOrDefault(q => q.ProjectId == taskDetail.ProjectId);
+
+            var details = dataContext.ProjectDetail.AsNoTracking().FirstOrDefault(q => q.ProjectId == projectId);
+            return Ok(details);
+
+        }
+
+        [HttpPut("UpdateTaskDetails")]
+        public IActionResult UpdateProjectDetails([FromBody] ProjectDetails projectDetail)
+        {
+            var details = dataContext.ProjectDetail.AsNoTracking().FirstOrDefault(q => q.ProjectId == projectDetail.ProjectId);
             if (details == null)
             {
                 return NotFound();
             }
             else
             {
-                dataContext.Entry(taskDetail).State = EntityState.Modified;
+
+                var diff = projectDetail.EndDate - projectDetail.StartDate;
+                var data = (int)diff.Days;
+                projectDetail.TodayDays = data.ToString();
+                dataContext.Entry(projectDetail).State = EntityState.Modified;
                 dataContext.SaveChanges();
-                return Ok(taskDetail);
+                return Ok(projectDetail);
             }
         }
+
         [HttpDelete("DeleteProjectDetails")]
         public IActionResult DeletProjectDetails(int id)
         {
@@ -60,7 +75,6 @@ namespace HrMangementApi.Controllers
             }
         }
 
-
         [HttpGet("getDetails")]
         public IActionResult ProjectDetails(string projectTitle)
         {
@@ -74,7 +88,7 @@ namespace HrMangementApi.Controllers
                               ProjectTitle = t1.ProjectTitle == null ? "no value" : t1.ProjectTitle,
                               ProjectName = t1.ProjectName == null ? "no value" : t1.ProjectName,
                               AssignedId = t1.AssiginedId == null ? 0 : t1.AssiginedId,
-                              CreatedBy = t1.CreateBy == null ? "no value" : t1.CreateBy,
+                              CreatedBy = t1.CreatedBy == null ? "no value" : t1.CreatedBy,
                               StartDate = t1.StartDate,
                               ProjectStatus = t1.ProjectStatus == null ? "no value" : t1.ProjectStatus,
                               ProjectDescription = t1.ProjectDescription == null ? "no value" : t1.ProjectDescription,
@@ -97,16 +111,19 @@ namespace HrMangementApi.Controllers
         public IActionResult projectTitle(string team)
         {
             var allemployess = (from a in dataContext.EmployeeModel
-                                where a.TeamName == team
+                                join b in dataContext.TaskDetails on a.EmployeeId equals b.EmployeeId
+
+                                where b.TaskName == team
                                 select new
                                 {
                                     a.FirstName,
+                                    a.LastName,
+                                    a.Position,
                                     a.TeamName,
-
-
                                 }).ToList();
             return Ok(allemployess);
         }
+
         [HttpGet("TaskName")]
         public IActionResult team(string taskName)
         {
@@ -115,7 +132,12 @@ namespace HrMangementApi.Controllers
                            where b.TaskName == taskName
                            select new
                            {
+                               b.TaskId,
+                               b.ProjectId,
+                               b.EmployeeId,
+                               b.AssigingId,
                                a.FirstName,
+                               a.LastName,
                                b.TaskName,
                                a.Position,
                                b.TaskDescription,
@@ -124,7 +146,58 @@ namespace HrMangementApi.Controllers
 
                            });
             return Ok(teamate);
+        }
+
+        [HttpGet("TaskProjectStatus")]
+        public IActionResult getProjectStatus(string TaskStatus)
+        {
+            List<TaskDetails> TaskDetails = new List<TaskDetails>();
+            var taskStatus = from t in dataContext.TaskDetails
+                             join p in dataContext.ProjectDetail on t.TaskName equals p.ProjectName
+                             join e in dataContext.EmployeeModel on t.EmployeeId equals e.EmployeeId
+                             where t.TaskName == p.ProjectName
+                             select new
+                             {
+                                 p.ProjectName,
+                                 t.TaskName,
+                             };
+            if (TaskStatus == "pending")
+            {
+                TaskDetails = dataContext.TaskDetails.Where(x => x.TaskStatus == "pending").Select(x => x).ToList();
+                return Ok(taskStatus);
+            }
+
+            return Ok(TaskDetails);
 
         }
+
+        /* [HttpGet("TaskProjectStatus")]
+         public IActionResult getProjectStatus(string Status)
+         {
+             var taskStatus = from t in dataContext.TaskDetails
+                              join p in dataContext.ProjectDetail on t.TaskName equals p.ProjectName
+                              join e in dataContext.EmployeeModel on t.EmployeeId equals e.EmployeeId
+                              where t.TaskName == p.ProjectName
+                              select new
+                              {
+                                  p.ProjectName,
+                                  t.TaskName,
+
+
+                              };
+             if (Status == "pending")
+             {
+
+                 return Ok(taskStatus);
+             }
+             else if (Status == "Completed")
+             {
+                 return Ok(taskStatus);
+             }
+             return BadRequest();
+         }*/
+
+
+
     }
 }
