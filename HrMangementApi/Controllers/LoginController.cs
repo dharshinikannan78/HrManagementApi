@@ -21,10 +21,10 @@ namespace HrMangementApi.Controllers
         public static readonly SymmetricSecurityKey SIGNING_KEY = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SECRET_KEY));
 
         private readonly UserdbContext dataContext;
-        public LoginController(UserdbContext _dataContext)
-        {
-            dataContext = _dataContext;
-        }
+            public LoginController(UserdbContext _dataContext)
+            {
+                dataContext = _dataContext;
+            }
 
         [HttpPost("Login")]
         public IActionResult GetLogin([FromBody] Login userObj)

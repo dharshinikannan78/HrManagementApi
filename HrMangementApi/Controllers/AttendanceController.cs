@@ -28,6 +28,15 @@ namespace HrMangementApi.Controllers
         [HttpPost("AddAttendance")]
         public IActionResult AddAttendance([FromBody] AttendanceDetails data)
         {
+            if (dataContext.AttendanceModel.Any(x => x.EmployeeId == data.EmployeeId && x.Date.Date == data.Date.Date))
+            {
+                return BadRequest(
+                           new
+                           {
+                               StatusCode = 400,
+                               Message = "Already Checked in Today "
+                           });
+            }
             data.InTime = DateTime.Now;
             dataContext.AttendanceModel.Add(data);
             dataContext.SaveChanges();
@@ -57,6 +66,18 @@ namespace HrMangementApi.Controllers
                 dataContext.Entry(data).State = EntityState.Modified;
                 dataContext.SaveChanges();
                 return Ok(data);
+                /*res.Status = "Present";
+                res.OutTime = DateTime.Now;
+                var date = DateTime.Now;
+                res.Date = date.Date;
+                var diff = data.OutTime - res.InTime;
+                var noofDays = (int)diff.Seconds;
+                res.WorkDuration = noofDays;
+                dataContext.Entry(data).State = EntityState.Modified;
+                dataContext.SaveChanges();
+                return Ok(data);*/
+
+
             }
 
             /*try

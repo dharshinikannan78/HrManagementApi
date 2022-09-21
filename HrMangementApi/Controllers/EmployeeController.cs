@@ -158,41 +158,121 @@ namespace HrMangementApi.Controllers
              return Ok(employees);*//*
 
         }*/
+        /* [HttpGet("GetUser")]
+         [Authorize]
+         public IActionResult GetUser(int data)
+         {
+             var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
+             var employee = dataContext.EmployeeModel.Where(x => x.EmployeeId == data).FirstOrDefault();
+             if (user != null && user.Role == "Admin")
+             {
+                 var res = (from a in dataContext.EmployeeModel
+                            join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
+                            where a.IsDeleted == false
+                            orderby a.EmployeeId descending
+                            select new
+                            {
+                                a.EmployeeId,
+                                a.FirstName,
+                                a.LastName,
+                                a.Gender,
+                                a.Designation,
+                                a.Address,
+                                a.Number,
+                                a.EmailId,
+                                a.AttachmentIds,
+                                a.DOB,
+                                a.JoiningDate,
+                                a.EmployeeReferenceNo,
+                                a.WorkMode,
+                                p.PhotoName,
+                                p.PhotoPath,
+                                a.TeamName,
+                                a.Position
+                            }).ToList();
+
+                 return Ok(res);
+
+             }
+             if (user != null && (user.Role == "TeamLeader" || user.Role == "TeamMember"))
+             {
+                 var res = (from a in dataContext.EmployeeModel
+                            join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
+                            where a.EmployeeId == data && a.IsDeleted == false
+
+                            select new
+                            {
+                                a.EmployeeId,
+                                a.FirstName,
+                                a.LastName,
+                                a.Gender,
+                                a.Designation,
+                                a.Address,
+                                a.Number,
+                                a.EmailId,
+                                a.DOB,
+                                a.JoiningDate,
+                                a.AttachmentIds,
+                                a.EmployeeReferenceNo,
+                                a.WorkMode,
+                                p.PhotoName,
+                                p.PhotoPath,
+                                a.TeamName,
+                                a.Position
+                            }).ToList();
+                 return Ok(res);
+
+             }
+
+             return BadRequest();
+         }*/
+
+
+
+
         [HttpGet("GetUser")]
-        /*[Authorize]*/
         public IActionResult GetUser(int data)
         {
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
-            var employee = dataContext.EmployeeModel.Where(x => x.EmployeeId == data).FirstOrDefault();
+            var employee = dataContext.EmployeeModel.Where(a => a.EmployeeId == data).FirstOrDefault();
             if (user != null && user.Role == "Admin")
             {
                 var res = (from a in dataContext.EmployeeModel
                            join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
                            where a.IsDeleted == false
-                           orderby a.EmployeeId descending
+
+                           orderby a.EmployeeId ascending
                            select new
                            {
                                a.EmployeeId,
                                a.FirstName,
                                a.LastName,
-                               a.Gender,
-                               a.Designation,
-                               a.Address,
-                               a.Number,
-                               a.EmailId,
-                               a.DOB,
-                               a.JoiningDate,
-                               a.EmployeeReferenceNo,
-                               a.WorkMode,
                                p.PhotoName,
                                p.PhotoPath,
+                               a.Position,
                                a.TeamName,
-                               a.Position
+                               a.Gender,
+                               a.Address,
+                               a.AttachmentIds,
+                               /*a.College,*/
+                               a.Designation,
+                               a.DOB,
+                               a.EmailId,
+                               a.JoiningDate,
+                               a.Number,
+                               /*a.PassedOut,*/
+                               /*a.Qualification,*/
+                               /*a.Skills,*/
+                               a.WorkMode
+
                            }).ToList();
 
-                return Ok(res);
+                var result = res.GroupBy(x => x.TeamName).ToList();
 
+                return Ok(result);
             }
+
+
             if (user != null && (user.Role == "TeamLeader" || user.Role == "TeamMember"))
             {
                 var res = (from a in dataContext.EmployeeModel
@@ -224,6 +304,8 @@ namespace HrMangementApi.Controllers
 
             return BadRequest();
         }
+
+
         [HttpDelete("DeleteEmployee")]
         public IActionResult DeleteEmployee(int Id)
         {
@@ -247,4 +329,3 @@ namespace HrMangementApi.Controllers
         }
     }
 }
-
