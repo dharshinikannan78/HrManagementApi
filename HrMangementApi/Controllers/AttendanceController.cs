@@ -76,8 +76,6 @@ namespace HrMangementApi.Controllers
                 dataContext.Entry(data).State = EntityState.Modified;
                 dataContext.SaveChanges();
                 return Ok(data);*/
-
-
             }
 
             /*try
