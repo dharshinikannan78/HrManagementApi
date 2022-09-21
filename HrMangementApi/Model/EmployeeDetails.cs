@@ -16,11 +16,16 @@ namespace HrMangementApi.Model
         public string EmailId { get; set; }
         public DateTime DOB { get; set; }
         public DateTime JoiningDate { get; set; }
+        public string Qualification { get; set; }
+        public string College { get; set; }
+        public DateTime PassedOut { get; set; }
+        public string Skills { get; set; }
         public string EmployeeReferenceNo { get; set; }
         public string WorkMode { get; set; }
         public string AttachmentIds { get; set; }
         public string TeamName { get; set; }
         public string Position { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
 
     }

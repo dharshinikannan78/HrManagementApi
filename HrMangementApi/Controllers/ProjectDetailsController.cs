@@ -44,21 +44,21 @@ namespace HrMangementApi.Controllers
                 return Ok(taskDetail);
             }
         }
-        [HttpDelete("DeleteProjectDetails")]
-        public IActionResult DeletProjectDetails(int id)
-        {
-            var delete = dataContext.ProjectDetail.Find(id);
-            if (delete == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                dataContext.ProjectDetail.Remove(delete);
-                dataContext.SaveChanges();
-                return Ok();
-            }
-        }
+        /* [HttpDelete("DeleteProjectDetails")]
+         public IActionResult DeletProjectDetails(int id)
+         {
+             var delete = dataContext.ProjectDetail.Find(id);
+             if (delete == null)
+             {
+                 return NotFound();
+             }
+             else
+             {
+                 dataContext.ProjectDetail.Remove(delete);
+                 dataContext.SaveChanges();
+                 return Ok();
+             }
+         }*/
 
 
         [HttpGet("getDetails")]
@@ -120,5 +120,32 @@ namespace HrMangementApi.Controllers
             return Ok(teamate);
 
         }
+        [HttpDelete("DeleteProject")]
+        public IActionResult DeleteProject(int Id)
+        {
+            var project = dataContext.ProjectDetail.Where(a => a.ProjectId == Id).FirstOrDefault();
+            var task = dataContext.TaskDetails.Where(a => a.ProjectId == Id);
+         
+           
+            if (project != null && project.IsDeleted == false && task == null)
+            {
+                project.IsDeleted = true;
+                dataContext.SaveChanges();
+                return Ok();
+            }
+            if (project != null && project.IsDeleted == false)
+            {
+                if(task!=null&&task.Any(a=>a.IsDeleted==false))
+                {
+                    task.Any(a=>a.IsDeleted==true);
+                    
+                }
+                project.IsDeleted = true;
+                dataContext.SaveChanges();
+                return Ok();
+            }
+            return BadRequest();
+        }
+
     }
 }

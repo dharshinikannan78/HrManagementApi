@@ -1,4 +1,4 @@
-﻿using HrMangementApi.Model;
+﻿        using HrMangementApi.Model;
 using HrMangementApi.UserDbContext;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -103,6 +103,8 @@ namespace HrMangementApi.Controllers
         [HttpGet("EmployeeId")]
         public IActionResult getParticulaDetails(int EmployeeId)
         {
+
+
             var allemployess = (from a in dataContext.EmployeeModel
                                 join b in dataContext.TaskDetails on a.EmployeeId equals b.EmployeeId
                                 where b.EmployeeId == EmployeeId
@@ -117,6 +119,18 @@ namespace HrMangementApi.Controllers
 
                                 }).ToList();
             return Ok(allemployess);
+        }
+        [HttpDelete("DeleteTask")]
+        public IActionResult DeleteTask(int Id)
+        {
+            var task = dataContext.TaskDetails.Where(a => a.TaskId == Id).FirstOrDefault();
+            if (task != null && task.IsDeleted == false)
+            {
+                task.IsDeleted = true;
+                dataContext.SaveChanges();
+                return Ok();
+            }
+            return BadRequest();
         }
     }
 }
