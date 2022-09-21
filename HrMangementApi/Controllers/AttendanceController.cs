@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+
+
 namespace HrMangementApi.Controllers
 {
     [EnableCors("AllowOrigin")]
@@ -28,17 +30,14 @@ namespace HrMangementApi.Controllers
         [HttpPost("AddAttendance")]
         public IActionResult AddAttendance([FromBody] AttendanceDetails data)
         {
-
-
             data.InTime = DateTime.Now;
             dataContext.AttendanceModel.Add(data);
             dataContext.SaveChanges();
             return Ok(data);
-
         }
 
 
-        [HttpPut("updateAttendance")]
+        [HttpPost("updateAttendance")]
         public IActionResult updateAttendance([FromBody] AttendanceDetails data)
         {
             try
@@ -47,7 +46,6 @@ namespace HrMangementApi.Controllers
                 if (update != null)
                 {
                     update.OutTime = data.OutTime;
-                    dataContext.AttendanceModel.Update(update);
                     dataContext.SaveChanges();
                 }
                 return Ok(update);
@@ -88,8 +86,6 @@ namespace HrMangementApi.Controllers
                               l.OutTime,
                               l.AttendanceId
 
-
-
                           }).ToList();
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
             if (user != null && user.Role == "Admin")
@@ -110,7 +106,6 @@ namespace HrMangementApi.Controllers
                              join e in dataContext.EmployeeModel on l.EmployeeId equals e.EmployeeId
                              join a in dataContext.AttendanceModel on l.EmployeeId equals a.EmployeeId
 
-
                              select new
                              {
                                  l.EmployeeId,
@@ -120,7 +115,6 @@ namespace HrMangementApi.Controllers
                                  a.InTime,
                                  a.OutTime,
                                  a.WorkDuration,
-
                              };
             var leave = from l in dataContext.LoginModels
                         join e in dataContext.EmployeeModel on l.EmployeeId equals e.EmployeeId
@@ -139,14 +133,9 @@ namespace HrMangementApi.Controllers
                             le.StartDate,
                             le.EndDate,
                             le.LeaveId
-
-
                         };
-
-
             return Ok(attendance);
-
-
         }
+       
     }
 }
