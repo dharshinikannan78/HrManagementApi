@@ -39,43 +39,8 @@ namespace HrMangementApi.Controllers
                 q.MailId == userObj.MailId
                 && q.Password == userObj.Password).FirstOrDefault();
 
-                /* if (user != null)
-                 {
-                     var credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(SIGNING_KEY, SecurityAlgorithms.HmacSha256);
-                     var header = new JwtHeader(credentials);
-                     DateTime Exp = DateTime.UtcNow.AddDays(60);
-                     int ts = (int)(Exp - new DateTime(1970, 1, 1)).TotalSeconds;
-                     var payload = new JwtPayload()
-             {
-                 {"sub", "testsubject" },
-                 {"Name", user.MailId },
-                 {"email", user.Password },
-                 {"exp" , ts },
-                 {"iss" , "https://localhost:44394" },
-                 {"aud" , "https://localhost:44394" }
-
-             };
-                     var secToken = new JwtSecurityToken(header, payload);
-                     var handler = new JwtSecurityTokenHandler();
-                     var adminUserName = user.MailId;
-                     var adminUserPassword = user.Password;
-                     var token = handler.WriteToken(secToken).ToString();
-                     Console.WriteLine(token);
-                     var finalToken = savetoDb(token, adminUserName, adminUserPassword);
-                     return Ok(user);
-                 }
-                 else
-                 {
-                     return NotFound(new
-                     {
-                         StatusCode = 404,
-                         Message = "Unauthorized"
-                     });
-                 }*/
-
-
                 if (user != null)
-                {       
+                {
                     return Ok(user);
                 }
                 else
@@ -99,6 +64,27 @@ namespace HrMangementApi.Controllers
             dataContext.TokenDetails.Add(dataObj);
             dataContext.SaveChanges();
             return dataObj;
+        }
+
+        public class LoginDataType
+        {
+            public string OldPassword { get; set; }
+            public string NewPassword { get; set; }
+            public int UserId { get; set; }
+        }
+
+        [HttpPost("EditLogin")]
+        public IActionResult EditLogin(LoginDataType Data)
+        {
+            var LoginData = dataContext.LoginModels.Where(s => s.UserId == Data.UserId && s.Password == Data.OldPassword).FirstOrDefault();
+            if (LoginData == null)
+            {
+                return BadRequest();
+            }
+            LoginData.Password = Data.NewPassword;
+            LoginData.IsFirstLogin = false;
+            dataContext.SaveChanges();
+            return Ok(LoginData);
         }
 
         [HttpPost("AddUser")]

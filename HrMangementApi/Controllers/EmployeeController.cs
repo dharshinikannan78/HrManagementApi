@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace HrMangementApi.Controllers
 {
@@ -29,11 +33,56 @@ namespace HrMangementApi.Controllers
         }
 
         [HttpPost("AddEmployee")]
-        public IActionResult AddEmployee([FromBody] EmployeeDetails employeeData)
+        public IActionResult AddEmployee(string login, [FromBody] EmployeeDetails employeeData)
         {
+            if (login == "none")
+            {
+                dataContext.EmployeeModel.Add(employeeData);
+                dataContext.SaveChanges();
+                return Ok(employeeData);
+            }
             dataContext.EmployeeModel.Add(employeeData);
             dataContext.SaveChanges();
+            string RandomPass = RandomString();
+            var data = new Login { EmployeeId = employeeData.EmployeeId, Password = RandomPass, MailId = employeeData.EmailId, Role = login, IsFirstLogin = true };
+                dataContext.LoginModels.Add(data);
+                dataContext.SaveChanges();
+                SendMail(data.MailId, data.Password);
             return Ok(employeeData);
+        }
+
+        private void SendMail(string to, string password)
+        {
+            string from = "mohamedsalmankhan509@gmail.com"; //From address
+            MailMessage message = new MailMessage(from, to);
+
+            string mailbody = "Thank you for registering, use your registered mail and below password for access " + "<b>" + password + "</b>";
+            message.Subject = "Login Credentials for Registered User";
+            message.Body = mailbody;
+            message.BodyEncoding = Encoding.UTF8;
+            message.IsBodyHtml = true;
+            SmtpClient client = new SmtpClient("smtp.gmail.com	", 587); //Gmail smtp    
+            NetworkCredential basicCredential1 = new
+            NetworkCredential("mohamedsalmankhan509@gmail.com", "mlxyocraxfotmeva");
+            client.EnableSsl = true;
+            client.UseDefaultCredentials = false;
+            client.Credentials = basicCredential1;
+            try
+            {
+                client.Send(message);
+            }
+
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public static string RandomString()
+        {
+            Random random = new Random();
+            const string chars = "AhghghgkBCDjEjShFWrGwHFvHmIlJpKuUWtsLaWqQxMvNnGhBgLtOLjPQPKaQfQdfRSsBTUYIUVWIAXCYZS01Q2C34H56789";
+            return new string(Enumerable.Repeat(chars, 12)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
         [HttpDelete("DeleteEmployee")]
@@ -134,14 +183,14 @@ namespace HrMangementApi.Controllers
                                 group gc by new
                                 {
                                     name = a.StartDate
-                                   
+
 
 
                                 } into g
                                 select new
                                 {
                                     h1 = g.Key.name,
-                                 
+
 
                                     h2 = g.Key.h,
                                 }).ToList();
