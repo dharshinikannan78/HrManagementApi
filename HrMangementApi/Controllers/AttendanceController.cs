@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Net;
+
 namespace HrMangementApi.Controllers
 {
     [EnableCors("AllowOrigin")]
@@ -28,15 +30,25 @@ namespace HrMangementApi.Controllers
         [HttpPost("AddAttendance")]
         public IActionResult AddAttendance([FromBody] AttendanceDetails data)
         {
-
-
-            data.InTime = DateTime.Now;
-            dataContext.AttendanceModel.Add(data);
-            dataContext.SaveChanges();
-            return Ok(data);
+            
+            if (dataContext.AttendanceModel.Any(x => x.EmployeeId == data.EmployeeId&&x.Date.Date==data.Date.Date))
+            {
+                return BadRequest(
+                           new
+                           {
+                               StatusCode = 400,
+                               Message = "Already Checked in Today "
+                           });
+            }
+                data.InTime = DateTime.UtcNow;
+                dataContext.AttendanceModel.Add(data);
+                dataContext.SaveChanges();
+                return Ok(data);
+            
+           
+            
 
         }
-
 
         [HttpPut("updateAttendance")]
         public IActionResult updateAttendance([FromBody] AttendanceDetails data)
@@ -47,6 +59,7 @@ namespace HrMangementApi.Controllers
                 if (update != null)
                 {
                     update.OutTime = data.OutTime;
+                    // update.WorkDuration = data.OutTime - data.InTime;
                     dataContext.AttendanceModel.Update(update);
                     dataContext.SaveChanges();
                 }
@@ -148,5 +161,95 @@ namespace HrMangementApi.Controllers
 
 
         }
+
+
+        [HttpPost("AttendanceByEmployee")]
+        public IActionResult AttendanceByEmployee(int id, [FromBody] FilterModel filter)
+        {
+
+            var user = dataContext.LoginModels.Where(x => x.EmployeeId == id).FirstOrDefault();
+            if (user != null && user.Role == "Admin")
+            {
+                var data = (from a in dataContext.AttendanceModel
+                            join e in dataContext.EmployeeModel on a.EmployeeId equals e.EmployeeId
+                            where a.Date.Date >= filter.FromDate.Date && a.Date.Date <= filter.ToDate.Date
+                            select new
+                            {
+                                a.Date,
+                                a.EmployeeId,
+                                e.FirstName,
+                                a.Status,
+
+                            }).ToList();
+
+
+                return Ok(data);
+
+            }
+            if (user != null && user.Role == "TeamLeader" || user.Role == "TeamMember")
+            {
+                var datas = (from a in dataContext.AttendanceModel
+                             join e in dataContext.EmployeeModel on a.EmployeeId equals e.EmployeeId
+                             where a.Date.Date >= filter.FromDate.Date && a.Date.Date <= filter.ToDate.Date && a.EmployeeId == id
+                             select new
+                             {
+                                 a.Date,
+                                 a.EmployeeId,
+                                 e.FirstName,
+                                 a.Status,
+
+                             });
+
+
+                return Ok(datas);
+
+            }
+            return BadRequest();
+        }
+        [HttpPost("LeaveByEmployee")]
+
+        public IActionResult LeaveByEmployee(int id, [FromBody] FilterModel filter)
+        {
+
+            var user = dataContext.LoginModels.Where(x => x.EmployeeId == id).FirstOrDefault();
+            if (user != null && user.Role == "Admin")
+            {
+                var data = (from a in dataContext.LeaveModel
+                            join e in dataContext.EmployeeModel on a.EmployeeId equals e.EmployeeId
+                            where a.StartDate.Date >= filter.FromDate.Date && a.StartDate.Date <= filter.ToDate.Date
+                            select new
+                            {
+                                a.StartDate,
+                                a.EmployeeId,
+                                e.FirstName,
+                                a.ApprovalStatus,
+
+                            }).ToList();
+
+
+                return Ok(data);
+
+            }
+            if (user != null && user.Role == "TeamLeader" || user.Role == "TeamMember")
+            {
+                var datas = (from a in dataContext.LeaveModel
+                             join e in dataContext.EmployeeModel on a.EmployeeId equals e.EmployeeId
+                             where a.StartDate.Date >= filter.FromDate.Date && a.StartDate.Date <= filter.ToDate.Date && a.EmployeeId == id
+                             select new
+                             {
+                                 a.StartDate,
+                                 a.EmployeeId,
+                                 e.FirstName,
+                                 a.ApprovalStatus,
+
+                             });
+
+
+                return Ok(datas);
+
+            }
+            return BadRequest();
+        }
     }
 }
+
