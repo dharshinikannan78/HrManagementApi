@@ -19,6 +19,7 @@ namespace HrMangementApi.Controllers
         {
             dataContext = _dataContext;
         }
+
         [HttpPost("ApplyLeave")]
         public IActionResult ApplyLeave([FromBody] LeaveDetails leaveData)
         {
@@ -32,8 +33,6 @@ namespace HrMangementApi.Controllers
             dataContext.SaveChanges();
             return Ok(leaveData);
         }
-
-
 
         [HttpGet("GetAllLeaveDetails")]
         public IActionResult AllLeaveDetails()
@@ -86,7 +85,7 @@ namespace HrMangementApi.Controllers
                                l.NoOfDays,
                                l.AppliedOn,
                                l.Reason,
-                               l.LeaveType,
+                               l.LeaveType, 
                                l.LeaveId,
                                l.ApprovalStatus
                            });
@@ -116,9 +115,8 @@ namespace HrMangementApi.Controllers
             {
                 return Ok(Details);
             }
-
             return BadRequest();
-        }   
         }
     }
+}
 

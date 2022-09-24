@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Text;
 
 namespace HrMangementApi.Controllers
 {
@@ -29,12 +32,58 @@ namespace HrMangementApi.Controllers
         }
 
         [HttpPost("AddEmployee")]
-        public IActionResult AddEmployee([FromBody] EmployeeDetails employeeData)
+        public IActionResult AddEmployee(string login, [FromBody] EmployeeDetails employeeData)
         {
+            if (login == "none")
+            {
+                dataContext.EmployeeModel.Add(employeeData);
+                dataContext.SaveChanges();
+                return Ok(employeeData);
+            }
             dataContext.EmployeeModel.Add(employeeData);
             dataContext.SaveChanges();
+            string RandomPass = RandomString();
+            var data = new Login { EmployeeId = employeeData.EmployeeId, Password = RandomPass, MailId = employeeData.EmailId, Role = login, IsFirstLogin = true };
+            dataContext.LoginModels.Add(data);
+            dataContext.SaveChanges();
+            SendMail(data.MailId, data.Password);
             return Ok(employeeData);
         }
+
+        private void SendMail(string to, string password)
+        {
+            string from = "mohamedsalmankhan509@gmail.com"; //From address
+            MailMessage message = new MailMessage(from, to);
+
+            string mailbody = "Thank you for registering, use your registered mail and below password for access " + "<b>" + password + "</b>";
+            message.Subject = "Login Credentials for Registered User";
+            message.Body = mailbody;
+            message.BodyEncoding = Encoding.UTF8;
+            message.IsBodyHtml = true;
+            SmtpClient client = new SmtpClient("smtp.gmail.com ", 587); //Gmail smtp    
+            NetworkCredential basicCredential1 = new
+            NetworkCredential("mohamedsalmankhan509@gmail.com", "mlxyocraxfotmeva");
+            client.EnableSsl = true;
+            client.UseDefaultCredentials = false;
+            client.Credentials = basicCredential1;
+            try
+            {
+                client.Send(message);
+            }
+
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public static string RandomString()
+        {
+            Random random = new Random();
+            const string chars = "AhghghgkBCDjEjShFWrGwHFvHmIlJpKuUWtsLaWqQxMvNnGhBgLtOLjPQPKaQfQdfRSsBTUYIUVWIAXCYZS01Q2C34H56789";
+            return new string(Enumerable.Repeat(chars, 12)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
 
         /*[HttpDelete("DeleteEmployee")]
         public IActionResult DeletEmployee(int id)
@@ -74,7 +123,6 @@ namespace HrMangementApi.Controllers
             var res = (from a in dataContext.EmployeeModel
                        join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
                        where a.EmployeeId == id
-
                        select new
                        {
                            a.FirstName,
@@ -93,17 +141,13 @@ namespace HrMangementApi.Controllers
 
                        }).ToList();
             return Ok(res);
-
         }
-
 
         [HttpGet("GetEmployeeDetails")]
         public IActionResult GetEmployees()
         {
-
             var allemployess = (from a in dataContext.EmployeeModel
                                 join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
-
                                 select new
                                 {
                                     a.FirstName,
@@ -121,7 +165,6 @@ namespace HrMangementApi.Controllers
                                 }).ToList();
             var employees = allemployess.ToList();
             return Ok(employees);
-
         }
         /*[HttpGet("EmployeeDetails")]
         public IActionResult GetAttendance(int id)
@@ -221,14 +264,9 @@ namespace HrMangementApi.Controllers
                                 a.Position
                             }).ToList();
                  return Ok(res);
-
-             }
-
-             return BadRequest();
+                     }
+                     return BadRequest();
          }*/
-
-
-
 
         [HttpGet("GetUser")]
         public IActionResult GetUser(int data)
@@ -240,7 +278,6 @@ namespace HrMangementApi.Controllers
                 var res = (from a in dataContext.EmployeeModel
                            join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
                            where a.IsDeleted == false
-
                            orderby a.EmployeeId ascending
                            select new
                            {
@@ -264,21 +301,15 @@ namespace HrMangementApi.Controllers
                                /*a.Qualification,*/
                                /*a.Skills,*/
                                a.WorkMode
-
                            }).ToList();
-
                 var result = res.GroupBy(x => x.TeamName).ToList();
-
                 return Ok(result);
             }
-
-
             if (user != null && (user.Role == "TeamLeader" || user.Role == "TeamMember"))
             {
                 var res = (from a in dataContext.EmployeeModel
                            join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
                            where a.EmployeeId == data && a.IsDeleted == false
-
                            select new
                            {
                                a.EmployeeId,
@@ -299,12 +330,9 @@ namespace HrMangementApi.Controllers
                                a.Position
                            }).ToList();
                 return Ok(res);
-
             }
-
             return BadRequest();
         }
-
 
         [HttpDelete("DeleteEmployee")]
         public IActionResult DeleteEmployee(int Id)
@@ -324,7 +352,6 @@ namespace HrMangementApi.Controllers
                 dataContext.SaveChanges();
                 return Ok();
             }
-
             return BadRequest();
         }
     }

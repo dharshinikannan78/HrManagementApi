@@ -25,6 +25,7 @@ namespace HrMangementApi.Controllers
             var details = dataContext.AttendanceModel.AsQueryable();
             return Ok(details);
         }
+
         [HttpPost("AddAttendance")]
         public IActionResult AddAttendance([FromBody] AttendanceDetails data)
         {
@@ -41,22 +42,19 @@ namespace HrMangementApi.Controllers
             dataContext.AttendanceModel.Add(data);
             dataContext.SaveChanges();
             return Ok(data);
-
         }
-
 
         [HttpPut("updateAttendance")]
         public IActionResult updateAttendance([FromBody] AttendanceDetails data)
         {
-
-            var res = dataContext.AttendanceModel.AsNoTracking().FirstOrDefault(a => a.AttendanceId == data.AttendanceId);
+            var res = dataContext.AttendanceModel.FirstOrDefault(a => a.AttendanceId == data.AttendanceId);
             if (res == null)
             {
                 return NotFound();
             }
             else
             {
-                data.Status = "Present";
+                /*data.Status = "Present";
                 data.OutTime = DateTime.Now;
                 var date = DateTime.Now;
                 data.Date = date.Date;
@@ -65,7 +63,15 @@ namespace HrMangementApi.Controllers
                 data.WorkDuration = noofDays;
                 dataContext.Entry(data).State = EntityState.Modified;
                 dataContext.SaveChanges();
-                return Ok(data);
+                return Ok(data);*/
+                res.OutTime = data.OutTime;
+                var date = DateTime.Now;
+                res.Date = date.Date;
+                var diff = data.OutTime - res.InTime;
+                var noofDays = (int)diff.Seconds;
+                res.WorkDuration = noofDays;
+                dataContext.SaveChanges();
+                return Ok(res);
                 /*res.Status = "Present";
                 res.OutTime = DateTime.Now;
                 var date = DateTime.Now;
@@ -93,14 +99,12 @@ namespace HrMangementApi.Controllers
             {
                 return BadRequest(ex);
             }*/
-
         }
 
 
         [HttpPost("AttendanceByEmployee")]
         public IActionResult AttendanceByEmployee(int id, [FromBody] FilterModel filter)
         {
-
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == id).FirstOrDefault();
             if (user != null && user.Role == "Admin")
             {
@@ -115,10 +119,7 @@ namespace HrMangementApi.Controllers
                                 a.Status,
 
                             }).ToList();
-
-
                 return Ok(data);
-
             }
             if (user != null && user.Role == "TeamLeader" || user.Role == "TeamMember")
             {
@@ -131,20 +132,16 @@ namespace HrMangementApi.Controllers
                                  a.EmployeeId,
                                  e.FirstName,
                                  a.Status,
-
                              });
-
-
                 return Ok(datas);
 
             }
             return BadRequest();
         }
-        [HttpPost("LeaveByEmployee")]
 
+        [HttpPost("LeaveByEmployee")]
         public IActionResult LeaveByEmployee(int id, [FromBody] FilterModel filter)
         {
-
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == id).FirstOrDefault();
             if (user != null && user.Role == "Admin")
             {
@@ -157,12 +154,8 @@ namespace HrMangementApi.Controllers
                                 a.EmployeeId,
                                 e.FirstName,
                                 a.ApprovalStatus,
-
                             }).ToList();
-
-
                 return Ok(data);
-
             }
             if (user != null && user.Role == "TeamLeader" || user.Role == "TeamMember")
             {
@@ -175,12 +168,8 @@ namespace HrMangementApi.Controllers
                                  a.EmployeeId,
                                  e.FirstName,
                                  a.ApprovalStatus,
-
                              });
-
-
                 return Ok(datas);
-
             }
             return BadRequest();
         }

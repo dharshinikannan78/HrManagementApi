@@ -7,12 +7,10 @@ namespace HrMangementApi.Model
         [Key]
         public int UserId { get; set; }
         public int EmployeeId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
         public string MailId { get; set; }
         public string Password { get; set; }
-        public string TeamName { get; set; }
         public string Role { get; set; }
+        public bool IsFirstLogin { get; set; }
         public bool IsDeleted { get; set; } = false;
     }
 }

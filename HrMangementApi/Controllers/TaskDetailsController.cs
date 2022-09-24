@@ -39,7 +39,6 @@ namespace HrMangementApi.Controllers
             }
             else
             {
-                
                 dataContext.Entry(addTask).State = EntityState.Modified;
                 dataContext.SaveChanges();
                 return Ok(addTask);

@@ -21,10 +21,10 @@ namespace HrMangementApi.Controllers
         public static readonly SymmetricSecurityKey SIGNING_KEY = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SECRET_KEY));
 
         private readonly UserdbContext dataContext;
-            public LoginController(UserdbContext _dataContext)
-            {
-                dataContext = _dataContext;
-            }
+        public LoginController(UserdbContext _dataContext)
+        {
+            dataContext = _dataContext;
+        }
 
         [HttpPost("Login")]
         public IActionResult GetLogin([FromBody] Login userObj)
@@ -72,10 +72,8 @@ namespace HrMangementApi.Controllers
                          Message = "Unauthorized"
                      });
                  }*/
-
-
                 if (user != null)
-                {       
+                {
                     return Ok(user);
                 }
                 else
@@ -104,11 +102,33 @@ namespace HrMangementApi.Controllers
         [HttpPost("AddUser")]
         public IActionResult AddUserLogin([FromBody] Login loginData)
         {
-
             dataContext.LoginModels.Add(loginData);
             dataContext.SaveChanges();
             return Ok(loginData);
         }
+
+        public class LoginDataType
+        {
+            public string OldPassword { get; set; }
+            public string NewPassword { get; set; }
+            public int UserId { get; set; }
+        }
+
+        [HttpPost("EditLogin")]
+        public IActionResult EditLogin(LoginDataType Data)
+        {
+            var LoginData = dataContext.LoginModels.Where(s => s.UserId == Data.UserId && s.Password == Data.OldPassword).FirstOrDefault();
+            if (LoginData == null)
+            {
+                return BadRequest();
+            }
+            LoginData.Password = Data.NewPassword;
+            LoginData.IsFirstLogin = false;
+            dataContext.SaveChanges();
+            return Ok(LoginData);
+        }
+
+
 
 
         [HttpDelete("Delete")]

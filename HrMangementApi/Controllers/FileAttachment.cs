@@ -113,7 +113,6 @@ namespace HrMangementApi.Controllers
             if (userData != null)
             {
                 var attamenctIds = userData.AttachmentIds.Split(',');
-
                 if (attamenctIds.Any())
                 {
                     foreach (var attamenctId in attamenctIds)

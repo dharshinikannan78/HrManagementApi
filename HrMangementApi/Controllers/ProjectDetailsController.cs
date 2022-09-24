@@ -33,10 +33,8 @@ namespace HrMangementApi.Controllers
         [HttpGet("ProjectId")]
         public IActionResult GetByProjectId(int projectId)
         {
-
             var details = dataContext.ProjectDetail.AsNoTracking().FirstOrDefault(q => q.ProjectId == projectId);
             return Ok(details);
-
         }
 
         [HttpPut("UpdateTaskDetails")]
@@ -49,7 +47,6 @@ namespace HrMangementApi.Controllers
             }
             else
             {
-
                 var diff = projectDetail.EndDate - projectDetail.StartDate;
                 var data = (int)diff.Days;
                 projectDetail.TodayDays = data.ToString();
@@ -112,7 +109,6 @@ namespace HrMangementApi.Controllers
         {
             var allemployess = (from a in dataContext.EmployeeModel
                                 join b in dataContext.TaskDetails on a.EmployeeId equals b.EmployeeId
-
                                 where b.TaskName == team
                                 select new
                                 {
@@ -143,7 +139,6 @@ namespace HrMangementApi.Controllers
                                b.TaskDescription,
                                b.TaskStatus,
                                a.TeamName,
-
                            });
             return Ok(teamate);
         }
@@ -166,38 +161,117 @@ namespace HrMangementApi.Controllers
                 TaskDetails = dataContext.TaskDetails.Where(x => x.TaskStatus == "pending").Select(x => x).ToList();
                 return Ok(taskStatus);
             }
-
             return Ok(TaskDetails);
+        }
+
+
+        [HttpGet("projectId")]
+        public IActionResult GetProjectDetails(int projectId)
+        {
+            var details = from t in dataContext.TaskDetails
+                          join t1 in dataContext.ProjectDetail on t.ProjectId equals t1.ProjectId
+                          join t2 in dataContext.EmployeeModel on t.EmployeeId equals t2.EmployeeId
+                          where t1.ProjectId == projectId
+                          select new
+                          {
+                              t2.FirstName,
+                              t1.ProjectId,
+                              t1.ProjectName,
+                              t.TaskName,
+                              t.TaskDescription
+                          };
+            return Ok(details);
+        }
+
+        [HttpGet("TaskInprogress")]
+        public IActionResult TaskInprogress(int projectId)
+        {
+            var details = from t in dataContext.TaskDetails
+                          join t1 in dataContext.ProjectDetail on t.ProjectId equals t1.ProjectId
+                          join t2 in dataContext.EmployeeModel on t.EmployeeId equals t2.EmployeeId
+                          where t.ProjectId == projectId
+                          where t.TaskStatus == "Inprogress"
+                          select new
+                          {
+                              t2.FirstName,
+                              t1.ProjectId,
+                              t1.ProjectName,
+                              t.TaskName,
+                              t.TaskDescription,
+                              t.TaskStatus
+                          };
+            return Ok(details);
 
         }
 
-        /* [HttpGet("TaskProjectStatus")]
-         public IActionResult getProjectStatus(string Status)
-         {
-             var taskStatus = from t in dataContext.TaskDetails
-                              join p in dataContext.ProjectDetail on t.TaskName equals p.ProjectName
-                              join e in dataContext.EmployeeModel on t.EmployeeId equals e.EmployeeId
-                              where t.TaskName == p.ProjectName
+        [HttpGet("TaskCompleted")]
+        public IActionResult TaskCompleted(int projectId)
+        {
+            var details = from t in dataContext.TaskDetails
+                          join t1 in dataContext.ProjectDetail on t.ProjectId equals t1.ProjectId
+                          join t2 in dataContext.EmployeeModel on t.EmployeeId equals t2.EmployeeId
+                          where t.ProjectId == projectId
+                          where t.TaskStatus == "Completed"
+                          select new
+                          {
+                              t2.FirstName,
+                              t1.ProjectId,
+                              t1.ProjectName,
+                              t.TaskName,
+                              t.TaskDescription,
+                              t.TaskStatus
+                          };
+            return Ok(details);
+        }
+
+            [HttpGet("TaskTODO")]
+            public IActionResult TaskTODO(int projectId)
+            {
+                var details = from t in dataContext.TaskDetails
+                              join t1 in dataContext.ProjectDetail on t.ProjectId equals t1.ProjectId
+                              join t2 in dataContext.EmployeeModel on t.EmployeeId equals t2.EmployeeId
+                              where t.ProjectId == projectId
+                              where t.TaskStatus == "TODO"
                               select new
                               {
-                                  p.ProjectName,
+                                  t2.FirstName,
+                                  t1.ProjectId,
+                                  t1.ProjectName,
                                   t.TaskName,
-
-
+                                  t.TaskDescription,
+                                  t.TaskStatus
                               };
-             if (Status == "pending")
+                return Ok(details);
+
+            }
+
+
+
+
+            /* [HttpGet("TaskProjectStatus")]
+             public IActionResult getProjectStatus(string Status)
              {
-
-                 return Ok(taskStatus);
-             }
-             else if (Status == "Completed")
-             {
-                 return Ok(taskStatus);
-             }
-             return BadRequest();
-         }*/
-
+                 var taskStatus = from t in dataContext.TaskDetails
+                                  join p in dataContext.ProjectDetail on t.TaskName equals p.ProjectName
+                                  join e in dataContext.EmployeeModel on t.EmployeeId equals e.EmployeeId
+                                  where t.TaskName == p.ProjectName
+                                  select new
+                                  {
+                                      p.ProjectName,
+                                      t.TaskName,
 
 
-    }
+                                  };
+                 if (Status == "pending")
+                 {
+
+                     return Ok(taskStatus);
+                 }
+                 else if (Status == "Completed")
+                 {
+                     return Ok(taskStatus);
+                 }
+                 return BadRequest();
+             }*/
+        }
 }

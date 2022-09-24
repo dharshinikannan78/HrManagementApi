@@ -13,6 +13,5 @@ namespace HrMangementApi.Model
         public string TaskStatus { get; set; }
         public int AssigingId { get; set; }
 
-
     }
 }
