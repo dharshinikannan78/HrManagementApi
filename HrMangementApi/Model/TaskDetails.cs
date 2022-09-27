@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace HrMangementApi.Model
 {
@@ -11,7 +12,9 @@ namespace HrMangementApi.Model
         public string TaskDescription { get; set; }
         public string TaskStatus { get; set; }
         public int AssigingId { get; set; }
-
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Priority { get; set; }
 
     }
 }

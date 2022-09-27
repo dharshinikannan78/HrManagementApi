@@ -19,6 +19,7 @@ namespace HrMangementApi.Model
         public DateTime EndDate { get; set; }
         public string CreateBy { get; set; }
 
+        public string Priority { get; set; }
 
     }
 }

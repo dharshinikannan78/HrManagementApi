@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 
@@ -125,6 +126,52 @@ namespace HrMangementApi.Controllers
                            });
             return Ok(teamate);
 
+        }
+        [HttpGet("GetTaskDetails")]
+        public IActionResult GetTaskDetails(int id)
+        {
+
+            var projectDetails = (from proj in dataContext.ProjectDetail
+                                  join b in dataContext.TaskDetails on proj.ProjectId equals b.ProjectId
+                                  join c in dataContext.EmployeeModel on b.EmployeeId equals c.EmployeeId
+                                  where proj.ProjectId == id
+                                  select new
+                                  { 
+                                      c.FirstName,
+                                      c.LastName,
+                                      proj.ProjectDescription,
+                                      proj.ProjectTitle,
+                                      proj.ProjectName,
+                                      proj.ProjectStatus,
+                                      proj.Priority,
+                                      proj.StartDate,
+                                      proj.EndDate,
+                                      DueDate = (proj.EndDate - DateTime.Now).Days + 1 >= 0 ? (proj.EndDate - DateTime.Now).Days + 1 : 0,
+                                  }
+                ).ToList();
+
+            var TaskDetails = (from task in dataContext.TaskDetails
+                               join b in dataContext.EmployeeModel on task.EmployeeId equals b.EmployeeId
+                               where task.ProjectId == id
+                               select new
+                               {
+                                   b.FirstName,
+                                   b.LastName,
+                                   task.TaskName,
+                                   task.TaskDescription,
+                                   task.TaskStatus,
+                                   task.StartDate,
+                                   task.EndDate,
+                                   task.Priority,
+                                   DueDate = (task.EndDate - DateTime.Now).Days + 1 >= 0 ? (task.EndDate - DateTime.Now).Days + 1 : 0,
+                               }).ToList().OrderByDescending(a => a.TaskStatus).GroupBy(x => x.TaskStatus).ToList();
+
+            var final = new
+            {
+                projectDetails,
+                TaskDetails
+            };
+            return Ok(final);
         }
     }
 }

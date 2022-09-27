@@ -21,5 +21,10 @@ namespace HrMangementApi.Model
         public string AttachmentIds { get; set; }
         public string TeamName { get; set; }
         public string Position { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public string College { get; set; }
+        public string PassedOut { get; set; }
+        public string Qualification { get; set; }
+        public string Skills { get; set; }
     }
 }
