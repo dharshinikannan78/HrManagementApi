@@ -22,7 +22,12 @@ namespace HrMangementApi.Model
         public string TeamName { get; set; }
         public string Position { get; set; }
         public bool IsDeleted { get; set; } = false;
-
+        public string ModifiedBy { get; set; }
+        public string DateOfModified { get; set; }
+        public string Qualification { get; set; }
+        public string College { get; set; }
+        public string Skills { get; set; }
+        public string PassedOut { get; set; }
 
     }
 }

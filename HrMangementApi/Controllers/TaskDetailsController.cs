@@ -39,6 +39,8 @@ namespace HrMangementApi.Controllers
             }
             else
             {
+                /* addTask.StartDate = res.StartDate;
+                 addTask.EndDate = res.EndDate;  */
                 dataContext.Entry(addTask).State = EntityState.Modified;
                 dataContext.SaveChanges();
                 return Ok(addTask);
@@ -66,6 +68,25 @@ namespace HrMangementApi.Controllers
             return Ok(allemployess);
         }
 
+
+        [HttpGet("projectDetails")]
+        public IActionResult GetProjectDetailsId(int id)
+        {
+            var allemployess = (from a in dataContext.ProjectDetail
+                                join b in dataContext.TaskDetails on a.ProjectId equals b.ProjectId
+                                join c in dataContext.EmployeeModel on b.EmployeeId equals c.EmployeeId
+                                where a.ProjectId == id
+                                select new
+                                {
+                                    c.FirstName,
+                                    a.ProjectId,
+
+                                }).ToList();
+            return Ok(allemployess);
+        }
+
+
+
         [HttpGet("teamName")]
         public IActionResult team(string teamName)
         {
@@ -87,6 +108,7 @@ namespace HrMangementApi.Controllers
             var allemployess = (from a in dataContext.EmployeeModel
                                 join b in dataContext.TaskDetails on a.EmployeeId equals b.EmployeeId
                                 where b.AssigingId == AssigingId
+
                                 select new
                                 {
                                     a.FirstName,
@@ -95,24 +117,27 @@ namespace HrMangementApi.Controllers
                                     b.TaskStatus,
                                     b.EmployeeId,
                                     b.AssigingId
-
                                 }).ToList();
             return Ok(allemployess);
         }
 
-        [HttpGet("EmployeeId")]
+        [HttpGet("taskDetailsForProfile")]
         public IActionResult getParticulaDetails(int EmployeeId)
         {
+
             var allemployess = (from a in dataContext.EmployeeModel
                                 join b in dataContext.TaskDetails on a.EmployeeId equals b.EmployeeId
+                                join c in dataContext.ProjectDetail on b.ProjectId equals c.ProjectId
                                 where b.EmployeeId == EmployeeId
                                 select new
                                 {
                                     a.FirstName,
                                     b.TaskName,
+                                    c.ProjectName,
                                     b.TaskDescription,
                                     b.TaskStatus,
                                     b.EmployeeId,
+                                    b.Priority,
                                     b.AssigingId
 
                                 }).ToList();

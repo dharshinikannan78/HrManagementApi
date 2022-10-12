@@ -23,16 +23,71 @@ namespace HrMangementApi.Controllers
         [HttpPost("ApplyLeave")]
         public IActionResult ApplyLeave([FromBody] LeaveDetails leaveData)
         {
-            leaveData.ApprovalStatus = "Pending";
-            leaveData.Status = "Leave";
-            var diff = leaveData.EndDate - leaveData.StartDate;
-            var noofDays = (int)diff.Days + 1;
-            leaveData.NoOfDays = noofDays;
-            leaveData.AppliedOn = DateTime.UtcNow.Date;
-            dataContext.LeaveModel.Add(leaveData);
-            dataContext.SaveChanges();
-            return Ok(leaveData);
+            if (leaveData.StartDate <= leaveData.EndDate && leaveData.EndDate >= leaveData.StartDate)
+            {
+                if (leaveData.LeaveDay == "Day")
+                {
+                    var data = dataContext.AttendanceModel.Any(x => x.EmployeeId == leaveData.EmployeeId && x.Date.Date == leaveData.StartDate.Date);
+                    if (!data)
+                    {
+                        var leave = dataContext.LeaveModel.Any(x => x.EmployeeId == leaveData.EmployeeId && x.StartDate.Date <= leaveData.StartDate.Date && x.EndDate.Date >= leaveData.StartDate.Date);
+                        if (!leave)
+                        {
+                            leaveData.ApprovalStatus = "Pending";
+                            var diff = leaveData.EndDate - leaveData.StartDate;
+                            var noofDays = diff.Days + 1;
+                            leaveData.NoOfDays = noofDays.ToString() + " Day";
+                            leaveData.AppliedOn = DateTime.UtcNow.Date;
+                            dataContext.LeaveModel.Add(leaveData);
+                            dataContext.SaveChanges();
+                            return Ok(leaveData);
+                        }
+                        return BadRequest();
+                    }
+                    return NotFound();
+                }
+                else if (leaveData.LeaveDay == "HalfDay")
+                {
+                    if (leaveData.StartDate.Date == leaveData.EndDate.Date)
+                    {
+                        var halfday = dataContext.LeaveModel.Any(x => x.EmployeeId == leaveData.EmployeeId && x.StartDate.Date == leaveData.StartDate.Date);
+                        if (!halfday)
+                        {
+                            leaveData.ApprovalStatus = "Pending";
+                            leaveData.NoOfDays = "0.5 Day";
+                            leaveData.AppliedOn = DateTime.UtcNow.Date;
+                            dataContext.LeaveModel.Add(leaveData);
+                            dataContext.SaveChanges();
+                            return Ok(leaveData);
+                        }
+                        return BadRequest();
+                    }
+                    return Forbid();
+                }
+                else if (leaveData.LeaveDay == "Permission" && leaveData.StartDate.Date == leaveData.EndDate.Date)
+                {
+                    var dataLeave = dataContext.LeaveModel.Any(x => x.EmployeeId == leaveData.EmployeeId && x.StartDate.Date == leaveData.StartDate.Date);
+                    if (!dataLeave)
+                    {
+                        var permission = leaveData.EndDate.TimeOfDay.TotalMinutes - leaveData.StartDate.TimeOfDay.TotalMinutes;
+
+                        leaveData.ApprovalStatus = "Pending";
+                        var hour = (int)permission / 60;
+                        var minute = (int)permission % 60;
+                        leaveData.NoOfDays = hour.ToString() + " Hrs " + minute.ToString() + " Min";
+                        leaveData.AppliedOn = DateTime.UtcNow.Date;
+                        dataContext.LeaveModel.Add(leaveData);
+                        dataContext.SaveChanges();
+                        return Ok(leaveData);
+                    }
+                    return BadRequest();
+                }
+
+                return Forbid();
+            }
+            return Forbid();
         }
+
 
         [HttpGet("GetAllLeaveDetails")]
         public IActionResult AllLeaveDetails()
@@ -55,17 +110,15 @@ namespace HrMangementApi.Controllers
         [HttpPut("UpdateLeaveDetails")]
         public IActionResult UpdateLeaveDetails([FromBody] LeaveDetails LeaveData)
         {
+
             var res = dataContext.LeaveModel.AsNoTracking().FirstOrDefault(a => a.LeaveId == LeaveData.LeaveId);
-            if (res == null)
-            {
-                return NotFound();
-            }
-            else
+            if (res != null && dataContext.LoginModels.Any(x => x.Role == "Admin"))
             {
                 dataContext.Entry(LeaveData).State = EntityState.Modified;
                 dataContext.SaveChanges();
                 return Ok();
             }
+            return BadRequest();
         }
 
         [HttpGet("GetLeave")]
@@ -85,7 +138,7 @@ namespace HrMangementApi.Controllers
                                l.NoOfDays,
                                l.AppliedOn,
                                l.Reason,
-                               l.LeaveType, 
+                               l.LeaveType,
                                l.LeaveId,
                                l.ApprovalStatus
                            });

@@ -12,5 +12,7 @@ namespace HrMangementApi.Model
         public string Role { get; set; }
         public bool IsFirstLogin { get; set; }
         public bool IsDeleted { get; set; } = false;
+        public string ResetToken { get; set; }
+        public System.DateTime? ResetTokenExpires { get; set; }
     }
 }

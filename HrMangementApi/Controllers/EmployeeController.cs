@@ -43,11 +43,21 @@ namespace HrMangementApi.Controllers
             dataContext.EmployeeModel.Add(employeeData);
             dataContext.SaveChanges();
             string RandomPass = RandomString();
-            var data = new Login { EmployeeId = employeeData.EmployeeId, Password = RandomPass, MailId = employeeData.EmailId, Role = login, IsFirstLogin = true };
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(RandomPass);
+            var data = new Login { EmployeeId = employeeData.EmployeeId, Password = passwordHash, MailId = employeeData.EmailId, Role = login, IsFirstLogin = true };
             dataContext.LoginModels.Add(data);
             dataContext.SaveChanges();
-            SendMail(data.MailId, data.Password);
+            SendMail(data.MailId, RandomPass);
             return Ok(employeeData);
+        }
+        [HttpGet("ValidateEmail")]
+
+        public IActionResult ValidateEmail(string data)
+        {
+            var email = dataContext.LoginModels.Where(e => e.MailId == data).FirstOrDefault();
+            if (email == null) return Ok("No User Found");
+            return Ok("User Found");
+
         }
 
         private void SendMail(string to, string password)
@@ -133,6 +143,8 @@ namespace HrMangementApi.Controllers
                            a.Number,
                            a.EmailId,
                            a.DOB,
+                           a.Position,
+                           
                            a.JoiningDate,
                            a.EmployeeReferenceNo,
                            a.WorkMode,

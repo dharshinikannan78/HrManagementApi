@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 namespace HrMangementApi.Controllers
 {
@@ -29,19 +30,33 @@ namespace HrMangementApi.Controllers
         [HttpPost("AddAttendance")]
         public IActionResult AddAttendance([FromBody] AttendanceDetails data)
         {
-            if (dataContext.AttendanceModel.Any(x => x.EmployeeId == data.EmployeeId && x.Date.Date == data.Date.Date))
+            if (dataContext.LeaveModel.Any(x => x.StartDate.Date == data.Date.Date && x.LeaveDay == "HalfDay" || x.LeaveDay == "Permission"))
             {
-                return BadRequest(
-                           new
-                           {
-                               StatusCode = 400,
-                               Message = "Already Checked in Today "
-                           });
+                if (!dataContext.AttendanceModel.Any(x => x.EmployeeId == data.EmployeeId && x.Date.Date == data.Date.Date))
+                {
+                    
+                    data.InTime = DateTime.Now;
+                    dataContext.AttendanceModel.Add(data);
+                    dataContext.SaveChanges();
+                    return Ok(data);
+                }
+                return NotFound();
             }
-            data.InTime = DateTime.Now;
-            dataContext.AttendanceModel.Add(data);
-            dataContext.SaveChanges();
-            return Ok(data);
+            else if (!dataContext.AttendanceModel.Any(x => x.EmployeeId == data.EmployeeId && x.Date.Date == data.Date.Date))
+            {
+                var attendance = dataContext.LeaveModel.Any(x => x.EmployeeId == data.EmployeeId && x.StartDate.Date <= data.Date.Date && x.EndDate.Date >= data.Date.Date);
+                if (!attendance)
+                {
+                    data.Status = "Present";
+                    data.InTime = DateTime.Now;
+                    dataContext.AttendanceModel.Add(data);
+                    dataContext.SaveChanges();
+                    return Ok(data);
+                }
+                return BadRequest();
+            }
+            return NotFound();
+
         }
 
         [HttpPut("updateAttendance")]
@@ -63,7 +78,7 @@ namespace HrMangementApi.Controllers
                 data.WorkDuration = noofDays;
                 dataContext.Entry(data).State = EntityState.Modified;
                 dataContext.SaveChanges();
-                return Ok(data);*/
+                return Ok(data);*//*
                 res.OutTime = data.OutTime;
                 var date = DateTime.Now;
                 res.Date = date.Date;
@@ -72,7 +87,7 @@ namespace HrMangementApi.Controllers
                 res.WorkDuration = noofDays;
                 dataContext.SaveChanges();
                 return Ok(res);
-                /*res.Status = "Present";
+                *//*res.Status = "Present";
                 res.OutTime = DateTime.Now;
                 var date = DateTime.Now;
                 res.Date = date.Date;
@@ -82,6 +97,16 @@ namespace HrMangementApi.Controllers
                 dataContext.Entry(data).State = EntityState.Modified;
                 dataContext.SaveChanges();
                 return Ok(data);*/
+                /*res.Status = "Present";*/
+                res.OutTime = DateTime.Now;
+                var date = DateTime.Now;
+                res.Date = date.Date;
+                var diff = data.OutTime.TimeOfDay.TotalMinutes - res.InTime.TimeOfDay.TotalMinutes;
+                var hour = (int)diff / 60;
+                var minute = (int)diff % 60;
+                res.WorkDuration = hour.ToString() + " Hrs " + minute.ToString() + " Min";
+                dataContext.SaveChanges();
+                return Ok(data);
             }
 
             /*try
@@ -173,8 +198,93 @@ namespace HrMangementApi.Controllers
             }
             return BadRequest();
         }
+
+
+        [HttpGet("GetAttendanceDetails")]
+        public IActionResult GetDetails()
+        {
+
+            List<AttendanceDetails> comment = new List<AttendanceDetails>();
+            List<LeaveDetails> Leave = new List<LeaveDetails>();
+
+
+            var output = comment.Select(q => new
+            {
+                id = q.EmployeeId,
+                date = q.Date,
+                type = "comment"
+
+
+            }).Concat(Leave.Select(q => new
+            {
+                id = q.EmployeeId,
+                date = q.Date,
+                type = "Leave"
+
+            })).OrderByDescending(q => q.date).Take(10);
+
+
+            return Ok(output);
+        }
+
+        [HttpGet("AttendanceDetails")]
+        public IActionResult AttendanceDetails(int data)
+        {
+            var EmployeeAttendance = (from a in dataContext.EmployeeModel
+                                      join l in dataContext.AttendanceModel on a.EmployeeId equals l.EmployeeId
+                                      where l.EmployeeId == data
+                                      orderby l.Date descending
+                                      select new
+                                      {
+                                          a.EmployeeId,
+                                          a.FirstName,
+                                          a.LastName,
+                                          a.Designation,
+                                          l.InTime,
+                                          l.OutTime,
+                                          l.AttendanceId,
+                                          l.Date,
+                                          l.Status,
+                                          l.WorkDuration
+                                      }).Take(5);
+
+            var AdminAttendance = (from a in dataContext.EmployeeModel
+                                   join l in dataContext.AttendanceModel on a.EmployeeId equals l.EmployeeId
+                                   orderby l.Date descending
+                                   select new
+                                   {
+                                       a.EmployeeId,
+                                       a.FirstName,
+                                       a.LastName,
+                                       a.Designation,
+                                       l.InTime,
+                                       l.OutTime,
+                                       l.AttendanceId,
+                                       l.Date,
+                                       l.Status,
+                                       l.WorkDuration
+
+                                   }).ToList();
+            var user = dataContext.LoginModels.Where(x => x.EmployeeId == data).FirstOrDefault();
+            if (user != null && user.Role == "Admin")
+            {
+                return Ok(AdminAttendance);
+            }
+            if (user != null && user.Role == "Employee")
+            {
+                return Ok(EmployeeAttendance);
+            }
+
+            return BadRequest();
+
+        }
+
+
     }
 }
+
+
+
 
 
 

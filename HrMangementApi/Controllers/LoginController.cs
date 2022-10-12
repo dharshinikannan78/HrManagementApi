@@ -4,9 +4,12 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Text;
 
 namespace HrMangementApi.Controllers
@@ -35,44 +38,10 @@ namespace HrMangementApi.Controllers
             }
             else
             {
-                var user = dataContext.LoginModels.Where(q =>
-                q.MailId == userObj.MailId
-                && q.Password == userObj.Password).FirstOrDefault();
+                var user = dataContext.LoginModels.Where(q => q.MailId == userObj.MailId).FirstOrDefault();
+                bool verified = BCrypt.Net.BCrypt.Verify(userObj.Password, user.Password);
 
-                /* if (user != null)
-                 {
-                     var credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(SIGNING_KEY, SecurityAlgorithms.HmacSha256);
-                     var header = new JwtHeader(credentials);
-                     DateTime Exp = DateTime.UtcNow.AddDays(60);
-                     int ts = (int)(Exp - new DateTime(1970, 1, 1)).TotalSeconds;
-                     var payload = new JwtPayload()
-             {
-                 {"sub", "testsubject" },
-                 {"Name", user.MailId },
-                 {"email", user.Password },
-                 {"exp" , ts },
-                 {"iss" , "https://localhost:44394" },
-                 {"aud" , "https://localhost:44394" }
-
-             };
-                     var secToken = new JwtSecurityToken(header, payload);
-                     var handler = new JwtSecurityTokenHandler();
-                     var adminUserName = user.MailId;
-                     var adminUserPassword = user.Password;
-                     var token = handler.WriteToken(secToken).ToString();
-                     Console.WriteLine(token);
-                     var finalToken = savetoDb(token, adminUserName, adminUserPassword);
-                     return Ok(user);
-                 }
-                 else
-                 {
-                     return NotFound(new
-                     {
-                         StatusCode = 404,
-                         Message = "Unauthorized"
-                     });
-                 }*/
-                if (user != null)
+                if (user != null && BCrypt.Net.BCrypt.Verify(userObj.Password, user.Password))
                 {
                     return Ok(user);
                 }
@@ -117,19 +86,59 @@ namespace HrMangementApi.Controllers
         [HttpPost("EditLogin")]
         public IActionResult EditLogin(LoginDataType Data)
         {
-            var LoginData = dataContext.LoginModels.Where(s => s.UserId == Data.UserId && s.Password == Data.OldPassword).FirstOrDefault();
+            var user = dataContext.LoginModels.Where(s => s.UserId == Data.UserId).FirstOrDefault();
+            bool verified = BCrypt.Net.BCrypt.Verify(Data.OldPassword, user.Password);
+            var LoginData = dataContext.LoginModels.Where(s => s.UserId == Data.UserId && verified).FirstOrDefault();
             if (LoginData == null)
             {
                 return BadRequest();
             }
-            LoginData.Password = Data.NewPassword;
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(Data.NewPassword);
+            LoginData.Password = passwordHash;
             LoginData.IsFirstLogin = false;
             dataContext.SaveChanges();
             return Ok(LoginData);
         }
 
+        [HttpGet("ForgotPassword")]
+        public IActionResult ForgotPassword(string Data)
+        {
+            var LoginData = dataContext.LoginModels.Where(s => s.MailId == Data).FirstOrDefault();
+            if (LoginData == null)
+            {
+                return BadRequest();
+            }
+            LoginData.ResetToken = randomTokenString();
+            LoginData.ResetTokenExpires = DateTime.UtcNow.AddDays(1);
+            dataContext.SaveChanges();
+            string body = "Your Password is resetted successfully<br/> Use below link to reset your password <b>" + LoginData.ResetToken + "</b>";
+            const string subject = "Reset Password";
+            SendMail(LoginData.MailId, body, subject);
+            return Ok(LoginData);
+        }
+        public class ResetPasswordModel
+        {
+            public string Password { get; set; }
+            public string ConfirmPassword { get; set; }
+            public string Token { get; set; }
+        }
 
+        [HttpPost("ResetPassword")]
+        public IActionResult ResetPassword(ResetPasswordModel Data)
+        {
+            var account = dataContext.LoginModels.Where(s => s.ResetToken == Data.Token && s.ResetTokenExpires > DateTime.UtcNow).FirstOrDefault();
+            if (account == null)
+            {
+                return BadRequest();
+            }
+            account.Password = BCrypt.Net.BCrypt.HashPassword(Data.ConfirmPassword);
+            account.ResetToken = null;
+            account.ResetTokenExpires = null;
 
+            dataContext.LoginModels.Update(account);
+            dataContext.SaveChanges();
+            return Ok(new { message = "Password reset successful, you can now login" });
+        }
 
         [HttpDelete("Delete")]
         public IActionResult DeletUser(int id)
@@ -147,5 +156,51 @@ namespace HrMangementApi.Controllers
             }
         }
 
+        private void SendMail(string to, string body, string subject)
+        {
+            string from = "mohamedsalmankhan509@gmail.com"; //From address
+            MailMessage message = new MailMessage(from, to);
+
+            string mailbody = body;
+            message.Subject = subject;
+            message.Body = mailbody;
+            message.BodyEncoding = Encoding.UTF8;
+            message.IsBodyHtml = true;
+            SmtpClient client = new SmtpClient("smtp.gmail.com ", 587); //Gmail smtp    
+            NetworkCredential basicCredential1 = new
+            NetworkCredential("mohamedsalmankhan509@gmail.com", "mlxyocraxfotmeva");
+            client.EnableSsl = true;
+            client.UseDefaultCredentials = false;
+            client.Credentials = basicCredential1;
+            try
+            {
+                client.Send(message);
+            }
+
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public static string RandomString()
+        {
+            Random random = new Random();
+            const string chars = "AhghghgkBCDjEjShFWrGwHFvHmIlJpKuUWtsLaWqQxMvNnGhBgLtOLjPQPKaQfQdfRSsBTUYIUVWIAXCYZS01Q2C34H56789";
+            return new string(Enumerable.Repeat(chars, 12)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        private string randomTokenString()
+        {
+            using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
+            var randomBytes = new byte[40];
+            rngCryptoServiceProvider.GetBytes(randomBytes);
+            // convert random bytes to hex string
+            return BitConverter.ToString(randomBytes).Replace("-", "");
+        }
+
     }
 }
+
+
+
