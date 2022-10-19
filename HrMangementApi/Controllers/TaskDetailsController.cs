@@ -23,7 +23,7 @@ namespace HrMangementApi.Controllers
         [HttpPost("AddTaskDeatils")]
         public IActionResult AddTaskDeatils([FromBody] TaskDetails addTask)
         {
-            addTask.TaskStatus = "InProgress";
+            addTask.TaskStatus = "TODO";
             dataContext.TaskDetails.Add(addTask);
             dataContext.SaveChanges();
             return Ok(addTask);
@@ -136,6 +136,7 @@ namespace HrMangementApi.Controllers
                                     c.ProjectName,
                                     b.TaskDescription,
                                     b.TaskStatus,
+                                    b.StartDate,
                                     b.EmployeeId,
                                     b.Priority,
                                     b.AssigingId

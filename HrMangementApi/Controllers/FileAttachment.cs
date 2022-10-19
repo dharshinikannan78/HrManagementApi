@@ -33,6 +33,7 @@ namespace HrMangementApi.Controllers
 
         public IActionResult UploadFileAttachment(IFormFile files, string fileType)
         {
+            if (Request.Form.Files.Count == 0) return BadRequest();
             for (int i = 0; i < Request.Form.Files.Count; ++i)
             {
                 var file = Request.Form.Files[i];

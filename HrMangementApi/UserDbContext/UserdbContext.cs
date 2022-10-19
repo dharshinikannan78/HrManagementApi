@@ -14,6 +14,7 @@ namespace HrMangementApi.UserDbContext
         public DbSet<TaskDetails> TaskDetails { get; set; }
         public DbSet<TokenRequest> TokenDetails { get; set; }
         public DbSet<ProjectDetails> ProjectDetail { get; set; }
+        public DbSet<ProjectMemberModel> ProjectMemberModel { get; set; }
 
 
 
@@ -28,6 +29,7 @@ namespace HrMangementApi.UserDbContext
             modelBulider.Entity<TaskDetails>().ToTable("task_details");
             modelBulider.Entity<TokenRequest>().ToTable("token_details");
             modelBulider.Entity<ProjectDetails>().ToTable("project_details");
+            modelBulider.Entity<ProjectMemberModel>().ToTable("project_members");
         }
     }
 }

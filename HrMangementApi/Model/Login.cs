@@ -14,5 +14,7 @@ namespace HrMangementApi.Model
         public bool IsDeleted { get; set; } = false;
         public string ResetToken { get; set; }
         public System.DateTime? ResetTokenExpires { get; set; }
+        public int ReportingId { get; set; }
+
     }
 }

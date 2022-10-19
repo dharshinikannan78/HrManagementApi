@@ -19,7 +19,7 @@ namespace HrMangementApi.Model
         public bool IsArchived { get; set; }
         public string Status { get; set; }
         public string TotalDays { get; set; }
-
+        public string EmployeeIds { get; set; }
 
     }
 }

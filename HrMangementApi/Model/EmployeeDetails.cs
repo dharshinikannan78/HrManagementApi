@@ -28,6 +28,7 @@ namespace HrMangementApi.Model
         public string College { get; set; }
         public string Skills { get; set; }
         public string PassedOut { get; set; }
+        public int UserId { get; set; }
 
     }
 }

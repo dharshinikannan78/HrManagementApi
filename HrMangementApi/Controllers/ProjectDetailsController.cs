@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Threading.Tasks;
 
 namespace HrMangementApi.Controllers
 {
@@ -25,6 +25,8 @@ namespace HrMangementApi.Controllers
         {
             taskDetail.ProjectStatus = "InProgress";
             taskDetail.StartDate = DateTime.Now;
+            taskDetail.EmployeeIds = string.Join(',', taskDetail.EmployeeIds);
+
             /*var total = taskDetail.EndDate - taskDetail.StartDate.Date;
             taskDetail.TodayDays = (int)total.TotalDays;*/
             dataContext.ProjectDetail.Add(taskDetail);
@@ -187,66 +189,6 @@ namespace HrMangementApi.Controllers
             return Ok(details);
         }
 
-        [HttpGet("TaskInprogress")]
-        public IActionResult TaskInprogress(int projectId)
-        {
-            var details = from t in dataContext.TaskDetails
-                          join t1 in dataContext.ProjectDetail on t.ProjectId equals t1.ProjectId
-                          join t2 in dataContext.EmployeeModel on t.EmployeeId equals t2.EmployeeId
-                          where t.ProjectId == projectId
-                          where t.TaskStatus == "Inprogress"
-                          select new
-                          {
-                              t2.FirstName,
-                              t1.ProjectId,
-                              t1.ProjectName,
-                              t.TaskName,
-                              t.TaskDescription,
-                              t.TaskStatus
-                          };
-            return Ok(details);
-        }
-
-        [HttpGet("TaskCompleted")]
-        public IActionResult TaskCompleted(int projectId)
-        {
-            var details = from t in dataContext.TaskDetails
-                          join t1 in dataContext.ProjectDetail on t.ProjectId equals t1.ProjectId
-                          join t2 in dataContext.EmployeeModel on t.EmployeeId equals t2.EmployeeId
-                          where t.ProjectId == projectId
-                          where t.TaskStatus == "Completed"
-                          select new
-                          {
-                              t2.FirstName,
-                              t1.ProjectId,
-                              t1.ProjectName,
-                              t.TaskName,
-                              t.TaskDescription,
-                              t.TaskStatus
-                          };
-            return Ok(details);
-        }
-
-        [HttpGet("TaskTODO")]
-        public IActionResult TaskTODO(int projectId)
-        {
-            var details = from t in dataContext.TaskDetails
-                          join t1 in dataContext.ProjectDetail on t.ProjectId equals t1.ProjectId
-                          join t2 in dataContext.EmployeeModel on t.EmployeeId equals t2.EmployeeId
-                          where t.ProjectId == projectId
-                          where t.TaskStatus == "TODO"
-                          select new
-                          {
-                              t2.FirstName,
-                              t1.ProjectId,
-                              t1.ProjectName,
-                              t.TaskName,
-                              t.TaskDescription,
-                              t.TaskStatus
-                          };
-            return Ok(details);
-
-        }
 
 
 
@@ -278,112 +220,150 @@ namespace HrMangementApi.Controllers
          }*/
 
         [HttpGet("GetTaskDetails")]
-        public IActionResult GetTaskDetails(int id, string ProjectStatus)
+        public IActionResult GetTaskDetails(int id, int? EmpId)           // project overview cmp source
         {
-            var image = (from t in dataContext.ProjectDetail
-                         join t1 in dataContext.TaskDetails on t.ProjectId equals t1.ProjectId
-                         join t2 in dataContext.EmployeeModel on t1.EmployeeId equals t2.EmployeeId
-                         where t.ProjectId == id
-                         select new
-                         {
-                             t2.FirstName,
-                             t2.LastName,
-                             t.ProjectId
-                         });
 
-            var details = (from t in dataContext.ProjectDetail
-
-                           where t.ProjectId == id
-                           where t.ProjectStatus == "Completed" || t.ProjectStatus == "InProgress"
-                           select new
-                           {
-                               t.StartDate,
-                               t.EndDate,
-                               t.ProjectName,
-                               t.ProjectDescription,
-                               t.TotalDays,
-                               t.Priority,
-                               t.ProjectStatus,
-                               t.ProjectTitle,
-                               t.ProjectId,
-                               t.AssiginedId,
-                               t.CreatedBy
-                           }).ToList();
-
-
-
-
-
-            var projectDetails = (from proj in dataContext.ProjectDetail
-                                  join b in dataContext.TaskDetails on proj.ProjectId equals b.ProjectId
-                                  join c in dataContext.EmployeeModel on b.EmployeeId equals c.EmployeeId
-                                  where proj.ProjectId == id
-                                  select new
-                                  {
-                                      c.FirstName,
-                                      c.LastName,
-                                      proj.ProjectDescription,
-                                      proj.ProjectTitle,
-                                      proj.ProjectName,
-                                      proj.ProjectStatus,
-                                      proj.Priority,
-                                      proj.StartDate,
-                                      proj.ProjectId,
-                                      proj.EndDate,
-                                      proj.AssiginedId,
-                                      DueDate = (proj.EndDate - DateTime.Now).Days + 1 >= 0 ? (proj.EndDate - DateTime.Now).Days + 1 : 0,
-                                  }
-                ).ToList();
-
-
-
-            var TaskDetails = (from task in dataContext.TaskDetails
-                               join t in dataContext.ProjectDetail on task.ProjectId equals t.ProjectId
-                               join b in dataContext.EmployeeModel on task.EmployeeId equals b.EmployeeId
-                               where task.ProjectId == id
+            if (EmpId != null)
+            {
+                var details = (from t in dataContext.ProjectDetail
+                               where t.ProjectId == id
+                               where t.IsArchived == false
                                select new
                                {
-                                   b.FirstName,
-                                   b.LastName,
+                                   t.StartDate,
+                                   t.EndDate,
                                    t.ProjectName,
-                                   task.TaskName,
-                                   task.TaskId,
-                                   task.EmployeeId,
-                                   task.TaskDescription,
-                                   task.TaskStatus,
-                                   task.StartDate,
-                                   task.EndDate,
-                                   task.Priority,
-                                   task.ProjectId,
-                                   task.AssigingId,
-                                   DueDate = (task.EndDate - DateTime.Now).Days + 1 >= 0 ? (task.EndDate - DateTime.Now).Days + 1 : 0,
-                               }).ToList().OrderByDescending(a => a.TaskStatus).GroupBy(x => x.TaskStatus).ToList();
+                                   t.ProjectDescription,
+                                   t.TotalDays,
+                                   t.Priority,
+                                   t.ProjectStatus,
+                                   t.ProjectTitle,
+                                   t.ProjectId,
+                                   t.AssiginedId,
+                                   t.CreatedBy,
 
-            /*   var detailsStatus = (from task in dataContext.TaskDetails
-                                    join t in dataContext.ProjectDetail on task.ProjectId equals t.ProjectId
-                                    join b in dataContext.EmployeeModel on task.EmployeeId equals b.EmployeeId
-                                    where t.ProjectStatus == "archived"
-                                    select new
-                                    { });*/
+                               }).ToList();
 
-            var final = new
+                var TaskDetails = (from task in dataContext.TaskDetails
+                                   join b in dataContext.EmployeeModel on task.EmployeeId equals b.EmployeeId
+                                   where task.ProjectId == id && task.EmployeeId == EmpId
+                                   where task.IsTaskArchieved == false
+                                   select new
+                                   {
+                                       b.FirstName,
+                                       b.LastName,
+                                       task.TaskName,
+                                       task.TaskId,
+                                       task.EmployeeId,
+                                       task.TaskDescription,
+                                       task.TaskStatus,
+                                       task.StartDate,
+                                       task.EndDate,
+                                       task.Priority,
+                                       task.ProjectId,
+                                       task.AssigingId,
+                                       DueDate = (task.EndDate - DateTime.Now).Days + 1 >= 0 ? (task.EndDate - DateTime.Now).Days + 1 : 0,
+                                   }).ToList().OrderByDescending(a => a.TaskStatus).GroupBy(x => x.TaskStatus).ToList();
+
+                var final = new
+                {
+                    details,
+                    TaskDetails,
+                };
+                return Ok(final);
+            }
+            else
             {
-                image,
-                details,
-                projectDetails,
-                TaskDetails,
+                var details = (from t in dataContext.ProjectDetail
+                               where t.ProjectId == id
+                               where t.IsArchived == false
+                               select new
+                               {
+                                   t.StartDate,
+                                   t.EndDate,
+                                   t.ProjectName,
+                                   t.ProjectDescription,
+                                   t.TotalDays,
+                                   t.Priority,
+                                   t.ProjectStatus,
+                                   t.ProjectTitle,
+                                   t.ProjectId,
+                                   t.AssiginedId,
+                                   t.CreatedBy,
 
-            };
-            return Ok(final);
+                               }).ToList();
+
+                var TaskDetails = (from task in dataContext.TaskDetails
+                                   join t in dataContext.ProjectDetail on task.ProjectId equals t.ProjectId
+                                   join b in dataContext.EmployeeModel on task.EmployeeId equals b.EmployeeId
+                                   where task.ProjectId == id
+                                   where task.IsTaskArchieved == false
+                                   select new
+                                   {
+                                       b.FirstName,
+                                       b.LastName,
+                                       t.ProjectName,
+                                       task.TaskName,
+                                       task.TaskId,
+                                       task.EmployeeId,
+                                       task.TaskDescription,
+                                       task.TaskStatus,
+                                       task.StartDate,
+                                       task.EndDate,
+                                       task.Priority,
+                                       task.ProjectId,
+                                       task.AssigingId,
+                                       DueDate = (task.EndDate - DateTime.Now).Days + 1 >= 0 ? (task.EndDate - DateTime.Now).Days + 1 : 0,
+                                   }).ToList().OrderByDescending(a => a.TaskStatus).GroupBy(x => x.TaskStatus).ToList();
+
+                /*   var detailsStatus = (from task in dataContext.TaskDetails
+                                        join t in dataContext.ProjectDetail on task.ProjectId equals t.ProjectId
+                                        join b in dataContext.EmployeeModel on task.EmployeeId equals b.EmployeeId
+                                        where t.ProjectStatus == "archived"
+                                        select new
+                                        { });*/
+
+
+
+                var final = new
+                {
+                    details,
+                    TaskDetails,
+                };
+                return Ok(final);
+            }
         }
 
         [HttpGet("GetAllProjectDetails")]
 
-        public IActionResult GetAllProjectDetails()
+        public IActionResult GetAllProjectDetails(int? EmpId)    //list component source
         {
-            // var proj = dataContext.ProjectDetail.AsQueryable().ToList().GroupBy(x => x.ProjectName).ToList();
+            if (EmpId != null)
+            {
+                var projectsDetails = (from a in dataContext.ProjectDetail
+                                       join b in dataContext.ProjectMemberModel on a.ProjectId equals b.ProjectId
+                                       where b.EmpId == EmpId
+                                       where a.IsArchived == false
+                                       select new
+                                       {
+                                           a.ProjectId,
+                                           a.ProjectName,
+                                           a.ProjectTitle,
+                                           a.StartDate,
+                                           a.AssiginedId,
+                                           a.CreatedBy,
+                                           a.EndDate,
+                                           a.ProjectDescription,
+                                           a.ProjectStatus,
+                                           a.Priority,
+
+                                       }).ToList().GroupBy(x => x.ProjectName).ToList();
+
+                return Ok(projectsDetails);
+            }
+
             var projects = (from a in dataContext.ProjectDetail
-                            where a.ProjectStatus == "InProgress" || a.ProjectStatus == "Completed"
+                            where a.IsArchived == false
                             select new
                             {
                                 a.ProjectId,
@@ -397,14 +377,81 @@ namespace HrMangementApi.Controllers
                                 a.ProjectStatus,
                                 a.Priority,
 
-
                             }).ToList();
             var proj = projects.GroupBy(x => x.ProjectName).ToList();
             return Ok(proj);
-
         }
-    }
 
+
+
+        [HttpGet("GetEmployeeDetails")]
+
+        public IActionResult GetAttachmentDetails(int projectIds)
+        {
+            var userData = dataContext.ProjectDetail.Where(a => a.ProjectId == projectIds)
+                .FirstOrDefault();
+            var attachmentList = new List<EmployeeDetails>();
+            if (userData != null)
+            {
+                var attamenctIds = userData.EmployeeIds.Split(',');
+
+                if (attamenctIds.Any())
+                {
+                    foreach (var attamenctId in attamenctIds)
+                    {
+                        var attachment = dataContext.EmployeeModel.Where(n => n.EmployeeId.ToString() == attamenctId).FirstOrDefault();
+                        attachmentList.Add(attachment);
+
+                    }
+
+                }
+            }
+            return Ok(attachmentList);
+        }
+
+        [HttpGet("AddEmployeeToProject")]
+        public ActionResult AddEmployeeToProject(int ProjId, string EmpIds)
+        {
+            var EmpId = EmpIds.Split(',');
+            if (EmpIds.Any())
+            {
+                foreach (var Emp in EmpId)
+                {
+                    var Ispresent = dataContext.ProjectMemberModel.Any(a => a.EmpId == int.Parse(Emp) && a.ProjectId == ProjId);
+                    if (Ispresent) continue;
+                    ProjectMemberModel ProjMem = new ProjectMemberModel();
+                    ProjMem.ProjectId = ProjId;
+                    ProjMem.EmpId = int.Parse(Emp);
+                    dataContext.ProjectMemberModel.Add(ProjMem);
+                }
+                dataContext.SaveChanges();
+            }
+            return Ok(new
+            {
+                message = "potachu poda venna"
+            });
+        }
+
+        [HttpGet("GetAddedEmpToProject")]
+        public ActionResult GetAddedEmpToProject(int id)
+        {
+            var Data = (from a in dataContext.ProjectMemberModel
+                        join p in dataContext.ProjectDetail on a.ProjectId equals p.ProjectId
+                        join x in dataContext.EmployeeModel on a.EmpId equals x.EmployeeId
+                        join f in dataContext.FileAttachment on x.AttachmentIds equals f.AttachmentId.ToString()
+                        where a.ProjectId == id
+
+                        select new
+                        {
+                            x.FirstName,
+                            x.LastName,
+                            x.EmployeeId,
+                            f.PhotoPath
+                        }).ToList();
+            return Ok(Data);
+        }
+
+    }
 }
 
 

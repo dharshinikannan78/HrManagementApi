@@ -95,11 +95,11 @@ namespace HrMangementApi
             {
                 endpoints.MapControllers();
             });
-           /* app.UseStaticFiles(new StaticFileOptions()
+            app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resource\Images")),
                 RequestPath = new PathString("/Resource/Images")
-            });*/
+            });
         }
     }
 }

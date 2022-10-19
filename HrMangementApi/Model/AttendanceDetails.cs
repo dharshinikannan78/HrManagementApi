@@ -12,7 +12,7 @@ namespace HrMangementApi.Model
         public string Status { get; set; }
         public DateTime Date { get; set; }
         public DateTime InTime { get; set; }
-        public DateTime OutTime { get; set; }
+        public DateTime? OutTime { get; set; }
         public string WorkDuration { get; set; }
         public string OverTimeDuration { get; set; }
 

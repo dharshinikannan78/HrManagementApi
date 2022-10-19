@@ -39,8 +39,6 @@ namespace HrMangementApi.Controllers
             else
             {
                 var user = dataContext.LoginModels.Where(q => q.MailId == userObj.MailId).FirstOrDefault();
-                bool verified = BCrypt.Net.BCrypt.Verify(userObj.Password, user.Password);
-
                 if (user != null && BCrypt.Net.BCrypt.Verify(userObj.Password, user.Password))
                 {
                     return Ok(user);
@@ -198,9 +196,59 @@ namespace HrMangementApi.Controllers
             // convert random bytes to hex string
             return BitConverter.ToString(randomBytes).Replace("-", "");
         }
+        [HttpGet("GetLoginDetails")]
+        public IActionResult GetLoginDetails()
+        {
 
+            var Employee = (from a in dataContext.LoginModels
+                            join x in dataContext.EmployeeModel on a.EmployeeId equals x.EmployeeId
+                            where a.Role == "TeamLead"
+                            select new
+                            {
+                                x.FirstName,
+                                a.Role,
+                                a.UserId
+                            }).ToList();
+            var TeamLead = (from a in dataContext.LoginModels
+                            join x in dataContext.EmployeeModel on a.EmployeeId equals x.EmployeeId
+                            where a.Role == "Manager"
+                            select new
+                            {
+                                x.FirstName,
+                                a.Role,
+                                a.UserId
+                            }).ToList();
+            var Manager = (from a in dataContext.LoginModels
+                           join x in dataContext.EmployeeModel on a.EmployeeId equals x.EmployeeId
+                           where a.Role == "Admin"
+                           select new
+                           {
+                               x.FirstName,
+                               a.Role,
+                               a.UserId
+                           }).ToList();
+
+
+            var ReportingPerson = new
+            {
+                Employee,
+                TeamLead,
+                Manager
+            };
+
+
+
+
+
+
+
+            return Ok(ReportingPerson);
+        }
     }
+
+
 }
+
 
 
 
