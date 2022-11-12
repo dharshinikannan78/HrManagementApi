@@ -20,7 +20,6 @@ namespace HrMangementApi.Model
         public string WorkMode { get; set; }
         public string AttachmentIds { get; set; }
         public string TeamName { get; set; }
-        public string Position { get; set; }
         public bool IsDeleted { get; set; } = false;
         public string ModifiedBy { get; set; }
         public string DateOfModified { get; set; }
@@ -28,7 +27,5 @@ namespace HrMangementApi.Model
         public string College { get; set; }
         public string Skills { get; set; }
         public string PassedOut { get; set; }
-        public int UserId { get; set; }
-
     }
 }

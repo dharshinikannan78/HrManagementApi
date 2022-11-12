@@ -11,10 +11,9 @@ using System.Linq;
 
 namespace HrMangementApi.Controllers
 {
+    [EnableCors("AllowOrigin")]
     [Route("api/[controller]")]
     [ApiController]
-    [EnableCors("AllowOrigin")]
-
     public class FileAttachment : ControllerBase
     {
         private readonly UserdbContext dataContext;
@@ -29,55 +28,74 @@ namespace HrMangementApi.Controllers
         {
             dataContext = _dataContext;
         }
-        [HttpPost("Attachment"), DisableRequestSizeLimit]
+
+        [RequestSizeLimit(525336576)]//501MB
+        [RequestFormLimits(MultipartBodyLengthLimit = 524288000)]
+        [HttpPost("Attachment")]
 
         public IActionResult UploadFileAttachment(IFormFile files, string fileType)
         {
-            if (Request.Form.Files.Count == 0) return BadRequest();
-            for (int i = 0; i < Request.Form.Files.Count; ++i)
+            try
             {
-                var file = Request.Form.Files[i];
-                var date = DateTime.Now.Date.Month.ToString() + "-" + DateTime.Now.Date.Year.ToString() + "-" + DateTime.Now.Day.ToString();
-                if (file.Name == "image")
+                if (Request.Form.Files.Count == 0) return BadRequest();
+                for (int i = 0; i < Request.Form.Files.Count; ++i)
                 {
-                    photoFileName = file.FileName;
-                    photoPathForDb = Path.Combine("Resource", "Images", date, photoFileName);
-                    var photoFolderName = Path.Combine(Directory.GetCurrentDirectory(), "Resource", "Images", date);
-                    Directory.CreateDirectory(photoFolderName);
-                    var photoPath = Path.Combine(photoFolderName, photoFileName).ToString();
-                    using (var stream = new FileStream(photoPath, FileMode.Append))
+                    var file = Request.Form.Files[i];
+                    var date = DateTime.Now.Date.Month.ToString() + "-" + DateTime.Now.Date.Year.ToString() + "-" + DateTime.Now.Day.ToString();
+                    if (file.Name == "image")
                     {
-                        file.CopyTo(stream);
+                        photoFileName = file.FileName;
+                        photoPathForDb = Path.Combine("Resource", "Images", date, photoFileName);
+                        var photoFolderName = Path.Combine(Directory.GetCurrentDirectory(), "Resource", "Images", date);
+                        Directory.CreateDirectory(photoFolderName);
+                        var photoPath = Path.Combine(photoFolderName, photoFileName).ToString();
+                        using (var stream = new FileStream(photoPath, FileMode.Append))
+                        {
+                            file.CopyTo(stream);
+                        }
+                    }
+                    else if (file.Name == "resume")
+                    {
+                        resumeFileName = file.FileName;
+                        resumePathForDb = Path.Combine("Resource", "Images", date, resumeFileName);
+                        var resumeFolderName = Path.Combine(Directory.GetCurrentDirectory(), "Resource", "Images", date);
+                        Directory.CreateDirectory(resumeFolderName);
+                        var photoPath = Path.Combine(resumeFolderName, resumeFileName).ToString();
+                        using (var stream = new FileStream(photoPath, FileMode.Append))
+                        {
+                            file.CopyTo(stream);
+                        }
+                    }
+                    else
+                    {
+                        certFileName = file.FileName;
+                        certPathForDb = Path.Combine("Resource", "Images", date, certFileName);
+                        var certFolderName = Path.Combine(Directory.GetCurrentDirectory(), "Resource", "Images", date);
+                        Directory.CreateDirectory(certFolderName);
+                        var photoPath = Path.Combine(certFolderName, certFileName).ToString();
+                        using (var stream = new FileStream(photoPath, FileMode.Append))
+                        {
+                            file.CopyTo(stream);
+                        }
                     }
                 }
-                else if (file.Name == "resume")
+                try
                 {
-                    resumeFileName = file.FileName;
-                    resumePathForDb = Path.Combine("Resource", "Images", date, resumeFileName);
-                    var resumeFolderName = Path.Combine(Directory.GetCurrentDirectory(), "Resource", "Images", date);
-                    Directory.CreateDirectory(resumeFolderName);
-                    var photoPath = Path.Combine(resumeFolderName, resumeFileName).ToString();
-                    using (var stream = new FileStream(photoPath, FileMode.Append))
-                    {
-                        file.CopyTo(stream);
-                    }
+                    var fileDetails = SaveFileToDB(photoFileName, photoPathForDb, resumeFileName, resumePathForDb, certFileName, certPathForDb);
+                    return Ok(fileDetails);
                 }
-                else
+                catch (Exception ex)
                 {
-                    certFileName = file.FileName;
-                    certPathForDb = Path.Combine("Resource", "Images", date, certFileName);
-                    var certFolderName = Path.Combine(Directory.GetCurrentDirectory(), "Resource", "Images", date);
-                    Directory.CreateDirectory(certFolderName);
-                    var photoPath = Path.Combine(certFolderName, certFileName).ToString();
-                    using (var stream = new FileStream(photoPath, FileMode.Append))
-                    {
-                        file.CopyTo(stream);
-                    }
+                    return Ok(ex.Message);
                 }
-            }
-            var fileDetails = SaveFileToDB(photoFileName, photoPathForDb, resumeFileName, resumePathForDb, certFileName, certPathForDb);
 
-            return Ok(fileDetails);
+
+            }
+            catch (Exception ex)
+            {
+                return Ok(ex.Message);
+            }
+
         }
         private FileAttachmentModel SaveFileToDB(string photoName, string photoPath, string resumeName, string resumePath, string certificateName, string certificatePath)
         {

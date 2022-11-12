@@ -14,7 +14,6 @@ namespace HrMangementApi.Model
         public DateTime InTime { get; set; }
         public DateTime? OutTime { get; set; }
         public string WorkDuration { get; set; }
-        public string OverTimeDuration { get; set; }
-
+        public Boolean IsChecked { get; set; } = false;
     }
 }

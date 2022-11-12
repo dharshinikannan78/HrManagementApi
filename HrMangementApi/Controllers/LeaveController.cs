@@ -210,7 +210,7 @@ namespace HrMangementApi.Controllers
             {
                 var Adminleave = (from a in dataContext.EmployeeModel
                                   join l in dataContext.LeaveModel on a.EmployeeId equals l.EmployeeId
-                                  where l.TeamLeadApprovalStatus == "Approved" && l.ManagerApprovalStatus == "Approved" && l.AdminApprovalStatus != "Approved"
+                                  where l.TeamLeadApprovalStatus == "Approved" && l.ManagerApprovalStatus == "Approved" && l.AdminApprovalStatus == "Pending"
                                   select new
                                   {
                                       a.EmployeeId,
@@ -326,9 +326,51 @@ namespace HrMangementApi.Controllers
         public IActionResult GetLeaveById(int id)
         {
             var user = dataContext.LoginModels.Where(x => x.EmployeeId == id).FirstOrDefault();
-            if (user != null && user.Role == "Admin")
+            if (user != null && user.Role != "Admin")
             {
-                var AdminAttendance = (from a in dataContext.EmployeeModel
+
+                var Leave = (from a in dataContext.EmployeeModel
+                                          join l in dataContext.LeaveModel on a.EmployeeId equals l.EmployeeId
+                                          where l.EmployeeId == id
+                                          orderby l.StartDate descending
+                                          select new
+                                          {
+                                              a.FirstName,
+                                              a.LastName,
+                                              l.EmployeeId,
+                                              l.StartDate,
+                                              l.EndDate,
+                                              l.LeaveId,
+                                              l.LeaveReason,
+                                              l.LeaveType,
+                                              l.NoOfDays,
+                                              l.AdminApprovalStatus,
+                                              l.AdminRejectReason,
+                                              l.AppliedOn,
+                                              l.LeaveDay,
+                                              l.TeamLeadApprovalStatus,
+                                              l.TeamLeadRejectReason,
+
+                                          }).ToList();
+                return Ok(Leave);
+            }
+            return BadRequest();
+        }
+
+         [HttpGet("GetLeaveStatus")]
+         public IActionResult GetLeaveStatus(int id)
+         {
+             var LeaveData = dataContext.LeaveModel.Where(x => x.LeaveId == id).AsNoTracking().FirstOrDefault();
+             if (LeaveData != null) return Ok(LeaveData);
+             return BadRequest();
+         }
+        [HttpGet("GetAllLeave")]
+        public IActionResult GetAllLeave(int id)
+        {
+            var user = dataContext.LoginModels.Where(x => x.EmployeeId == id).FirstOrDefault();
+            if (user != null&&user.Role=="Admin")
+            {
+                var AdminAllLeave = (from a in dataContext.EmployeeModel
                                        join l in dataContext.LeaveModel on a.EmployeeId equals l.EmployeeId
                                        orderby l.StartDate descending
                                        select new
@@ -349,40 +391,178 @@ namespace HrMangementApi.Controllers
                                            l.TeamLeadApprovalStatus,
                                            l.TeamLeadRejectReason,
                                        }).ToList();
-                return Ok(AdminAttendance);
+                return Ok(AdminAllLeave);
             }
-            var EmployeeAttendance = (from a in dataContext.EmployeeModel
-                                      join l in dataContext.LeaveModel on a.EmployeeId equals l.EmployeeId
-                                      where l.EmployeeId == id
-                                      orderby l.StartDate descending
-                                      select new
-                                      {
-                                          a.FirstName,
-                                          a.LastName,
-                                          l.EmployeeId,
-                                          l.StartDate,
-                                          l.EndDate,
-                                          l.LeaveId,
-                                          l.LeaveReason,
-                                          l.LeaveType,
-                                          l.NoOfDays,
-                                          l.AdminApprovalStatus,
-                                          l.AdminRejectReason,
-                                          l.AppliedOn,
-                                          l.LeaveDay,
-                                          l.TeamLeadApprovalStatus,
-                                          l.TeamLeadRejectReason,
-
-                                      }).ToList();
-            return Ok(EmployeeAttendance);
+            if (user != null && user.Role == "Manager")
+            {
+                var ManagerAllLeave = (from a in dataContext.LoginModels
+                                     join x in dataContext.EmployeeModel on a.EmployeeId equals x.EmployeeId
+                                     join l in dataContext.LeaveModel on a.EmployeeId equals l.EmployeeId
+                                     orderby l.StartDate descending
+                                     where a.ReportingId == id||a.Role=="Employee"
+                                     select new
+                                     {
+                                         x.FirstName,
+                                         x.LastName,
+                                         l.EmployeeId,
+                                         l.StartDate,
+                                         l.EndDate,
+                                         l.LeaveId,
+                                         l.LeaveReason,
+                                         l.LeaveType,
+                                         l.NoOfDays,
+                                         l.AdminApprovalStatus,
+                                         l.AdminRejectReason,
+                                         l.AppliedOn,
+                                         l.LeaveDay,
+                                         l.TeamLeadApprovalStatus,
+                                         l.TeamLeadRejectReason,
+                                     }).ToList();
+                return Ok(ManagerAllLeave);
+            }
+            if (user != null && user.Role == "TeamLead")
+            {
+                var TeamLeadAllLeave = (from a in dataContext.LoginModels
+                                       join x in dataContext.EmployeeModel on a.EmployeeId equals x.EmployeeId
+                                       join l in dataContext.LeaveModel on a.EmployeeId equals l.EmployeeId
+                                       orderby l.StartDate descending
+                                       where a.ReportingId == id 
+                                       select new
+                                       {
+                                           x.FirstName,
+                                           x.LastName,
+                                           l.EmployeeId,
+                                           l.StartDate,
+                                           l.EndDate,
+                                           l.LeaveId,
+                                           l.LeaveReason,
+                                           l.LeaveType,
+                                           l.NoOfDays,
+                                           l.AdminApprovalStatus,
+                                           l.AdminRejectReason,
+                                           l.AppliedOn,
+                                           l.LeaveDay,
+                                           l.TeamLeadApprovalStatus,
+                                           l.TeamLeadRejectReason,
+                                       }).ToList();
+                return Ok(TeamLeadAllLeave);
+            }
+            return NotFound();
+        }
+        public class testType
+        {
+            public int Id { get; set; }
+            public DateTime Date { get; set; }
+            public string Status { get; set; }
         }
 
-        [HttpGet("GetLeaveStatus")]
-        public IActionResult GetLeaveStatus(int id)
+        [HttpGet("AttdLeaveData")]
+        public IActionResult AttdLeaveData()
         {
-            var LeaveData = dataContext.LeaveModel.Where(x => x.LeaveId == id).AsNoTracking().FirstOrDefault();
-            if (LeaveData != null) return Ok(LeaveData);
+            var att = dataContext.AttendanceModel.Select(x => new testType { Id = x.AttendanceId, Date = x.Date, Status = x.Status }).ToList();
+            var Leave = dataContext.LeaveModel.Select(x => new testType { Id = x.LeaveId, Date = x.StartDate, Status = x.LeaveReason }).ToList();
+            att.AddRange(Leave);
+            var test = att.OrderBy(a => a.Date).ToList();
+            return Ok(test);
+        }
+
+        [HttpGet("GetTotalLeave")]
+        public IActionResult GetTotalLeave(int id, DateTime month)
+        {
+            var user = dataContext.LoginModels.Any(x => x.EmployeeId == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            if (user)
+            {
+                var res = dataContext.LeaveModel.Where(a => a.EmployeeId == id && (a.LeaveDay == "Day" || a.LeaveDay == "HalfDay") && a.AdminApprovalStatus == "Approved" &&
+              ((a.StartDate.Month >= month.Month && a.EndDate.Month <= month.Month) && (a.StartDate.Year == month.Year && a.EndDate.Year == month.Year))).Select(x => x.NoOfDays).ToList();
+                var resp = res.Select(x => x.Replace(" Day", ""));
+                float total = resp.Sum(x => float.Parse(x));
+                return Ok(total);
+            }
+            return NotFound();
+
+        }
+        [HttpGet("GetTotalPermission")]
+        public IActionResult GetTotalPermission(int id, DateTime month)
+        {
+            var user = dataContext.LoginModels.Any(x => x.EmployeeId == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            if (user)
+            {
+                var res = dataContext.LeaveModel.Where(a => a.EmployeeId == id && a.LeaveDay == "Permission" && a.AdminApprovalStatus == "Approved" &&
+        ((a.StartDate.Month >= month.Month && a.EndDate.Month <= month.Month) && (a.StartDate.Year == month.Year && a.EndDate.Year == month.Year))).Select(x => x.NoOfDays).ToList();
+                var hour = res.Select(x => x.Remove(2));
+                var min = res.Select(x => x.Remove(0, 6));
+                var resp = min.Select(x => x.Replace(" Min", ""));
+                int totalhour = hour.Sum(x => int.Parse(x));
+                int totalmin = resp.Sum(x => int.Parse(x));
+                var hours = totalhour + (totalmin / 60);
+                var minutes = totalmin % 60;
+                var TotalPermission = hours.ToString() + " Hrs " + minutes.ToString() + " Mins";
+
+                return Ok(TotalPermission);
+            }
+            return NotFound();
+
+
+        }
+
+        [HttpGet("GetNotification")]
+        public IActionResult Getnotification(int id)
+        {
+            var user = dataContext.LoginModels.Where(x => x.EmployeeId == id).FirstOrDefault();
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+            if (user.Role == "Admin")
+            {
+                var team = (from a in dataContext.LoginModels
+                            join x in dataContext.LeaveModel on a.EmployeeId equals x.EmployeeId
+                            where x.TeamLeadApprovalStatus == "Approved" && x.ManagerApprovalStatus == "Approved" && x.AdminApprovalStatus == "Pending"
+                            select new
+                            {
+
+                            });
+                var Notify = team.Count();
+                return Ok(Notify);
+            }
+            if (user.Role == "Manager")
+            {
+                var team = (from a in dataContext.LoginModels
+                            join x in dataContext.LeaveModel on a.EmployeeId equals x.EmployeeId
+                            where (a.ReportingId == id || a.Role == "Employee") && x.TeamLeadApprovalStatus == "Approved" && x.ManagerApprovalStatus == "Pending"
+                            select new
+                            {
+
+                            });
+
+                var Notify = team.Count();
+                return Ok(Notify);
+            }
+            if (user.Role == "TeamLead")
+            {
+                var team = (from a in dataContext.LoginModels
+                            join x in dataContext.LeaveModel on a.EmployeeId equals x.EmployeeId
+                            where a.ReportingId == id && x.TeamLeadApprovalStatus == "Pending"
+                            select new
+                            {
+
+                            });
+                var Notify = team.Count();
+                return Ok(Notify);
+            }
+
             return BadRequest();
         }
+
     }
 }
+

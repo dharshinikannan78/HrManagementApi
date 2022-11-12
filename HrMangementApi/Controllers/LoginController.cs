@@ -206,8 +206,9 @@ namespace HrMangementApi.Controllers
                             select new
                             {
                                 x.FirstName,
+                                x.LastName,
                                 a.Role,
-                                a.UserId
+                                a.EmployeeId
                             }).ToList();
             var TeamLead = (from a in dataContext.LoginModels
                             join x in dataContext.EmployeeModel on a.EmployeeId equals x.EmployeeId
@@ -215,8 +216,9 @@ namespace HrMangementApi.Controllers
                             select new
                             {
                                 x.FirstName,
+                                x.LastName,
                                 a.Role,
-                                a.UserId
+                                a.EmployeeId
                             }).ToList();
             var Manager = (from a in dataContext.LoginModels
                            join x in dataContext.EmployeeModel on a.EmployeeId equals x.EmployeeId
@@ -224,8 +226,9 @@ namespace HrMangementApi.Controllers
                            select new
                            {
                                x.FirstName,
+                               x.LastName,
                                a.Role,
-                               a.UserId
+                               a.EmployeeId
                            }).ToList();
 
 

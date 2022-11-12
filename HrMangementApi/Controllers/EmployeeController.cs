@@ -38,7 +38,7 @@ namespace HrMangementApi.Controllers
         }
 
         [HttpPost("AddEmployee")]
-        public IActionResult AddEmployee(string login, [FromBody] EmployeeDetails employeeData)
+        public IActionResult AddEmployee(string login, int RepId, [FromBody] EmployeeDetails employeeData)
         {
             if (login == "none")
             {
@@ -50,7 +50,7 @@ namespace HrMangementApi.Controllers
             dataContext.SaveChanges();
             string RandomPass = RandomString();
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(RandomPass);
-            var data = new Login { EmployeeId = employeeData.EmployeeId, Password = passwordHash, MailId = employeeData.EmailId, Role = login, IsFirstLogin = true, ReportingId = employeeData.UserId };
+            var data = new Login { EmployeeId = employeeData.EmployeeId, Password = passwordHash, MailId = employeeData.EmailId, Role = login, IsFirstLogin = true, ReportingId = RepId };
             dataContext.LoginModels.Add(data);
             dataContext.SaveChanges();
             SendMail(data.MailId, RandomPass);
@@ -68,17 +68,17 @@ namespace HrMangementApi.Controllers
 
         private void SendMail(string to, string password)
         {
-            string from = "mohamedsalmankhan509@gmail.com"; //From address
+            string from = "info.rsinfosolution.in@gmail.com"; //From address
             MailMessage message = new MailMessage(from, to);
 
-            string mailbody = "Thank you for registering, use your registered mail and below password for access " + "<b>" + password + "</b>";
+            string mailbody = "Thank you for registering, use your registered mail and below password for access " + "<b>" + password + "</b><br/>Use Below link to Access for access <br/>http://3.110.106.202/app/user/login";
             message.Subject = "Login Credentials for Registered User";
             message.Body = mailbody;
             message.BodyEncoding = Encoding.UTF8;
             message.IsBodyHtml = true;
-            SmtpClient client = new SmtpClient("smtp.gmail.com ", 587); //Gmail smtp    
+            SmtpClient client = new SmtpClient("smtp.gmail.com", 587); //Gmail smtp    
             NetworkCredential basicCredential1 = new
-            NetworkCredential("mohamedsalmankhan509@gmail.com", "mlxyocraxfotmeva");
+            NetworkCredential("info.rsinfosolution.in@gmail.com", "mrpkyxbcdcyjdezy");
             client.EnableSsl = true;
             client.UseDefaultCredentials = false;
             client.Credentials = basicCredential1;
@@ -117,7 +117,7 @@ namespace HrMangementApi.Controllers
         }
 
         [HttpGet("GetEmployeeDetailsById")]
-        public IActionResult GetEmployeeDetailsById(int id)
+        public object GetEmployeeDetailsById(int id)
         {
             var res = (from a in dataContext.EmployeeModel
                        join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
@@ -132,14 +132,13 @@ namespace HrMangementApi.Controllers
                            a.Number,
                            a.EmailId,
                            a.DOB,
-                           a.Position,
                            a.JoiningDate,
                            a.EmployeeReferenceNo,
                            a.WorkMode,
                            p.PhotoName,
                            p.PhotoPath
                        });
-            return Ok(res);
+            return res;
         }
 
         [HttpGet("getEmployeeDetailsWithPhoto")]
@@ -176,7 +175,6 @@ namespace HrMangementApi.Controllers
                                a.LastName,
                                p.PhotoName,
                                p.PhotoPath,
-                               a.Position,
                                a.TeamName,
                                a.Gender,
                                a.Address,
@@ -191,7 +189,7 @@ namespace HrMangementApi.Controllers
                 var result = res.GroupBy(x => x.TeamName).ToList();
                 return Ok(result);
             }
-            if (user != null && (user.Role == "Manager" || user.Role == "TeamMember"))
+            if (user != null && user.Role != "Admin")
             {
                 var res = (from a in dataContext.EmployeeModel
                            join p in dataContext.FileAttachment on a.AttachmentIds equals p.AttachmentId.ToString()
@@ -212,8 +210,7 @@ namespace HrMangementApi.Controllers
                                a.WorkMode,
                                p.PhotoName,
                                p.PhotoPath,
-                               a.TeamName,
-                               a.Position
+                               a.TeamName
                            }).ToList();
                 return Ok(res);
             }

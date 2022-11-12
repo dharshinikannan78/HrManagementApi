@@ -110,22 +110,6 @@ namespace HrMangementApi.Controllers
             return Ok(details);
         }
 
-        [HttpGet("TeamMembers")]
-        public IActionResult projectTitle(string team)
-        {
-            var allemployess = (from a in dataContext.EmployeeModel
-                                join b in dataContext.TaskDetails on a.EmployeeId equals b.EmployeeId
-                                where b.TaskName == team
-                                select new
-                                {
-                                    a.FirstName,
-                                    a.LastName,
-                                    a.Position,
-                                    a.TeamName,
-                                }).ToList();
-            return Ok(allemployess);
-        }
-
         [HttpGet("TaskName")]
         public IActionResult team(string taskName)
         {
@@ -141,7 +125,6 @@ namespace HrMangementApi.Controllers
                                a.FirstName,
                                a.LastName,
                                b.TaskName,
-                               a.Position,
                                b.TaskDescription,
                                b.TaskStatus,
                                a.TeamName,
